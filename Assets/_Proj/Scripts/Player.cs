@@ -1,20 +1,39 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.ShaderKeywordFilter;
 using UnityEngine;
 
 //Player Script
-[RequireComponent(typeof(Collider), typeof(Rigidbody))]
 public class Player : MonoBehaviour
 {
   [Header("Movement Settings")]
-  public float currSpeed; // 현재 속도
+  public float currSpeed; // 현재 속도 -> Rigidbody로 실시간 계산
   public float acceleration; // 가속도
-  public float brakeAmount; // 브레이크 적용 정도
+  public float brakeForce; // 브레이크 적용 정도
   public float backwardAccel; // 후진 가속도
+  public float reverseSpeedLimit; // 후진 제한 속도
   public float limitSpeed; // 최고 속도
-  public float drift;  // 드리프트
-  public float turnSpeed; // 회전 속도
+  public float driftSteerBoost;  // 드리프트
+  public float steerSpeed; // 조향 반응 속도
+  public float driftBrakeBoost; // 회전 속도
 
+  [Header("Wheel Colliders")]
+  public WheelCollider frontLWheelCollider;
+  public WheelCollider frontRWheelCollider;
+  public WheelCollider rearLWheelCollider;
+  public WheelCollider rearRWheelCollider;
+
+  [Header("Wheel Meshes")]
+  public Transform frontLWheelTrans;
+  public Transform frontRWheelTrans;
+  public Transform rearLWheelTrans;
+  public Transform rearRWheelTrans;
+
+  public float maxMotorTorque;
+  public float maxSteerAngle;
+  
+  
   private Rigidbody rb;
 
   //TODO:
@@ -36,12 +55,25 @@ public class Player : MonoBehaviour
     CarMove();
   }
 
-  // 물리 연산 관련 처리는 FixedUpdate가 안정적
   void FixedUpdate()
   {
     ApplyTurn();
     Drift();
-    ApplyExternalBoosts();
+  }
+
+  void LateUpdate()
+  {
+    UpdateWheelVisual(frontLWheelCollider, frontLWheelTrans);
+    UpdateWheelVisual(frontRWheelCollider, frontRWheelTrans);
+    UpdateWheelVisual(rearLWheelCollider, rearLWheelTrans);
+    UpdateWheelVisual(rearRWheelCollider, rearRWheelTrans);
+  }
+
+  private void UpdateWheelVisual(WheelCollider coll, Transform wheelTrans)
+  {
+    coll.GetWorldPose(out Vector3 pos, out Quaternion rot);
+    wheelTrans.position = pos;
+    wheelTrans.rotation = rot;
   }
 
   void CarMove()
@@ -49,49 +81,87 @@ public class Player : MonoBehaviour
     float x = Input.GetAxis("Horizontal"); // 좌우
     float z = Input.GetAxis("Vertical"); // 앞뒤(z==1 : 앞, z==-1 : 뒤, z==0 아무것도 누르지 않음)
 
-    if (z > 0f)
+    currSpeed = rb.velocity.magnitude * Vector3.Dot(transform.forward, rb.velocity.normalized);
+
+    if (z > 0 && currSpeed < limitSpeed)
     {
-      currSpeed += acceleration * Time.deltaTime; // 현재 속도 + 가속도(w누르면 속도 오름)
-      currSpeed = Mathf.Min(currSpeed, limitSpeed); // 현재 속도와 최고속도를 비교해서 가장 작은 값으로 할당.(속도 제한)
+      rearLWheelCollider.motorTorque = acceleration;
+      rearRWheelCollider.motorTorque = acceleration;
+
+      rearLWheelCollider.brakeTorque = 0f;
+      rearRWheelCollider.brakeTorque = 0f;
     }
     else if (z < 0f)
     {
       if (currSpeed > 0f)
       {
-        currSpeed -= brakeAmount * Time.deltaTime;
-        currSpeed = Mathf.Max(currSpeed, 0f); // 음수 속도 되는 것 방지
+        rearLWheelCollider.brakeTorque = brakeForce;
+        rearRWheelCollider.brakeTorque = brakeForce;
+
+        rearLWheelCollider.motorTorque = 0f;
+        rearRWheelCollider.motorTorque = 0f;
       }
-      else
+      else if (currSpeed > -reverseSpeedLimit)
       {
-        currSpeed -= backwardAccel * Time.deltaTime;
-        currSpeed = Mathf.Max(currSpeed, -10f); // 후진 최고 속도 제한
+        rearLWheelCollider.motorTorque = -backwardAccel;
+        rearRWheelCollider.motorTorque = -backwardAccel;
+
+        rearLWheelCollider.brakeTorque = 0f;
+        rearRWheelCollider.brakeTorque = 0f;
       }
     }
-
-    if (x > 0f)
-    {
-
-    }
-    else if (x < 0f)
-    {
-
-    }
-
     // 어떤 키도 누르고 있지 않을때 서서히 감속(현재 속도를 0f에 가까워지도록 1초동안 brakeAmount만큼 프레임 보정(프레임 속도와 무관하게 일정힌 감속 유지))
-    else currSpeed = Mathf.MoveTowards(currSpeed, 0f, brakeAmount * Time.deltaTime);
+    else {
+      {
+        rearLWheelCollider.motorTorque = 0f;
+        rearRWheelCollider.motorTorque = 0f;
 
-    Vector3 move = transform.forward * currSpeed * Time.deltaTime;
-    rb.MovePosition(rb.position + move);
+        rearLWheelCollider.brakeTorque = brakeForce * 0.5f;
+        rearRWheelCollider.brakeTorque = brakeForce * 0.5f;
+      }
+
+
+      if (x > 0f)
+      {
+
+      }
+      else if (x < 0f)
+      {
+
+      }
+
+
+      Vector3 move = transform.forward * currSpeed * Time.deltaTime;
+      rb.MovePosition(rb.position + move);
+    }
   }
+
+    bool IsDrift() {
+      return Mathf.Abs(currSpeed) > 50f && Input.GetKey(KeyCode.S) && Mathf.Abs(Input.GetAxis("Horizontal")) > 0.1f;
+    }
+
 
   void ApplyTurn()
   {
+      float steerInput = Input.GetAxis("Horizontal");
+      float steerAngle = steerInput * maxSteerAngle;
 
+      if (IsDrift())
+      {
+        steerAngle *= driftSteerBoost;
+      }
+
+      frontLWheelCollider.steerAngle = Mathf.Lerp(frontLWheelCollider.steerAngle, steerAngle, steerSpeed * Time.deltaTime);
+      frontRWheelCollider.steerAngle = Mathf.Lerp(frontRWheelCollider.steerAngle, steerAngle, steerSpeed * Time.deltaTime);
   }
 
   void Drift()
   {
-
+    if (IsDrift())
+    {
+      rearLWheelCollider.brakeTorque = brakeForce * driftBrakeBoost;
+      rearRWheelCollider.brakeTorque = brakeForce * driftBrakeBoost;
+    }
   }
 
   void ApplyExternalBoosts()
