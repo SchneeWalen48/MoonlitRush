@@ -49,6 +49,7 @@ public class Player : MonoBehaviour
   void Awake()
   {
     rb = GetComponent<Rigidbody>();
+    rb.centerOfMass = new Vector3(0, -0.5f, -0.3f);
   }
   void Update()
   {
