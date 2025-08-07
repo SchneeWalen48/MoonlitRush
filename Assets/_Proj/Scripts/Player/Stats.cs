@@ -8,7 +8,7 @@ public class Stats
   public float currSpeed;
   public float speed = 20f;
   public float acceleration = 10f;
-  public float steer = 100f;
+  public float steer = 20f;
   public float brakeForce = 30f;
   [Min(0.001f)]
   public float limitSpeed;

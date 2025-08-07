@@ -660,6 +660,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1303803659}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!1 &605353538 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6954492481675581825, guid: c0fba933bea9ee24c93d232d7f04de8b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1780803346}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &684445963 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4989202140053332254, guid: c0fba933bea9ee24c93d232d7f04de8b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1780803346}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -709,6 +721,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!146 &885818088 stripped
+WheelCollider:
+  m_CorrespondingSourceObject: {fileID: 1799249762279213631, guid: c0fba933bea9ee24c93d232d7f04de8b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1780803346}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1221804127 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6954521560053267473, guid: c0fba933bea9ee24c93d232d7f04de8b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1780803346}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1303803655
 GameObject:
   m_ObjectHideFlags: 0
@@ -1048,6 +1072,65 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8a44c22c17bee64bb5e5f1d27e85b13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inputSource: {fileID: 1568472920}
+  wheelsMeshes:
+  - {fileID: 1645993340}
+  - {fileID: 605353538}
+  - {fileID: 1948222365}
+  - {fileID: 1221804127}
+  frontLeftWheel: {fileID: 885818088}
+  frontRightWheel: {fileID: 1222995528744390896}
+  rearLeftWheel: {fileID: 1222995528744390895}
+  rearRightWheel: {fileID: 1222995528744390894}
+  rb: {fileID: 1568472921}
+  CenterOfMass: {fileID: 684445963}
+  currSpeed: 0
+  reverseSpeed: 10
+  accel: 5
+  accelReverse: 5
+  brake: 2
+  dragTime: 10
+  steerAngle: 20
+  limitSpeed: 150
+  limitSpeedReverse: 100
+  steerSpeed: 1
+  accelCurve: 1
+  accelCurveCoeff: 1
+  driftGrip: 0.4
+  addDriftSteer: 5
+  inAngleToFinishDrift: 10
+  minSpeedPercentToFinishDrift: 0.5
+  driftControl: 10
+  driftDampening: 10
+  airborneReorientation: 5
+  addedGravity: 0.2
+  groundLayers:
+    serializedVersion: 2
+    m_Bits: 123
+--- !u!114 &1568472920 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2239609661054236326, guid: c0fba933bea9ee24c93d232d7f04de8b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1780803346}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1568472918}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86d9c3b255e5f954fa237f329871d507, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!54 &1568472921 stripped
+Rigidbody:
+  m_CorrespondingSourceObject: {fileID: 2187586306545415831, guid: c0fba933bea9ee24c93d232d7f04de8b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1780803346}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1645993340 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6954484890270442195, guid: c0fba933bea9ee24c93d232d7f04de8b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1780803346}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1720064911
 GameObject:
   m_ObjectHideFlags: 0
@@ -1231,8 +1314,7 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 3659202872094653216, guid: c0fba933bea9ee24c93d232d7f04de8b, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -1241,6 +1323,12 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1568472919}
   m_SourcePrefab: {fileID: 100100000, guid: c0fba933bea9ee24c93d232d7f04de8b, type: 3}
+--- !u!1 &1948222365 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6954548828751337579, guid: c0fba933bea9ee24c93d232d7f04de8b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1780803346}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1222995528744390892
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1335,6 +1423,78 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 1222995528744390892}
   m_PrefabAsset: {fileID: 0}
+--- !u!146 &1222995528744390894 stripped
+WheelCollider:
+  m_CorrespondingSourceObject: {fileID: 3619687429610900048, guid: c0fba933bea9ee24c93d232d7f04de8b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1222995528744390892}
+  m_PrefabAsset: {fileID: 0}
+--- !u!146 &1222995528744390895 stripped
+WheelCollider:
+  m_CorrespondingSourceObject: {fileID: 2432911260715135981, guid: c0fba933bea9ee24c93d232d7f04de8b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1222995528744390892}
+  m_PrefabAsset: {fileID: 0}
+--- !u!146 &1222995528744390896 stripped
+WheelCollider:
+  m_CorrespondingSourceObject: {fileID: 1446143797469440945, guid: c0fba933bea9ee24c93d232d7f04de8b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1222995528744390892}
+  m_PrefabAsset: {fileID: 0}
+--- !u!146 &1222995528744390897 stripped
+WheelCollider:
+  m_CorrespondingSourceObject: {fileID: 1799249762279213631, guid: c0fba933bea9ee24c93d232d7f04de8b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1222995528744390892}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1222995528744390898 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6954484890270442195, guid: c0fba933bea9ee24c93d232d7f04de8b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1222995528744390892}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1222995528744390899 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6954492481675581825, guid: c0fba933bea9ee24c93d232d7f04de8b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1222995528744390892}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1222995528744390900 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6954548828751337579, guid: c0fba933bea9ee24c93d232d7f04de8b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1222995528744390892}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1222995528744390901 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6954521560053267473, guid: c0fba933bea9ee24c93d232d7f04de8b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1222995528744390892}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1222995528744390902 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4989202140053332254, guid: c0fba933bea9ee24c93d232d7f04de8b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1222995528744390892}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1222995528744390903 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2239609661054236326, guid: c0fba933bea9ee24c93d232d7f04de8b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1222995528744390892}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1222995528744390893}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86d9c3b255e5f954fa237f329871d507, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!54 &1222995528744390904 stripped
+Rigidbody:
+  m_CorrespondingSourceObject: {fileID: 2187586306545415831, guid: c0fba933bea9ee24c93d232d7f04de8b,
+    type: 3}
+  m_PrefabInstance: {fileID: 1222995528744390892}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1222995528744390910
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1347,6 +1507,43 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0049ab911c74d3b42b9d256d6b03c263, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inputSource: {fileID: 1222995528744390903}
+  stats:
+    currSpeed: 0
+    speed: 20
+    acceleration: 10
+    steer: 50
+    brakeForce: 30
+    limitSpeed: 100
+    reverseSpeed: 10
+    reverseAccel: 10
+    AccelerationCurve: 0.2
+    braking: 0
+    dragTime: 0
+    grip: 0
+    addedGravity: 0
+  rb: {fileID: 1222995528744390904}
+  CenterOfMass: {fileID: 1222995528744390902}
+  visualWheelsMesh:
+  - {fileID: 1222995528744390901}
+  - {fileID: 1222995528744390900}
+  - {fileID: 1222995528744390899}
+  - {fileID: 1222995528744390898}
+  frontLeftWheel: {fileID: 1222995528744390897}
+  frontRightWheel: {fileID: 1222995528744390896}
+  rearLeftWheel: {fileID: 1222995528744390895}
+  rearRightWheel: {fileID: 1222995528744390894}
+  steerSpeed: 10
+  airborneReorientation: 5
+  driftGrip: 0.4
+  addDriftSteer: 5
+  inAngleToFinishDrift: 10
+  minSpeedPercentToFinishDrift: 0.5
+  driftControl: 10
+  driftDampening: 10
+  groundLayers:
+    serializedVersion: 2
+    m_Bits: 123
 --- !u!1001 &2461033472600211320
 PrefabInstance:
   m_ObjectHideFlags: 0
