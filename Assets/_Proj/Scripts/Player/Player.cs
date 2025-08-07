@@ -1,6 +1,8 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
 
 public class Player : MonoBehaviour
 {
@@ -44,6 +46,14 @@ public class Player : MonoBehaviour
   public float driftDampening = 10.0f;
   public LayerMask groundLayers = Physics.DefaultRaycastLayers;
 
+  [Header("Booster")]
+  public float boosterSpeedAdd;
+  public float boosterAccelAdd;
+  public float boosterDuration;
+  
+  private float currBoosterTime;
+  private Stats originalStats;
+
   public bool wantsToDrift { get; private set; } = false;
   public bool isDrifting { get; private set; } = false;
   float currGrip = 1.0f;
@@ -59,8 +69,8 @@ public class Player : MonoBehaviour
     if (inputSource == null)
       inputSource = GetComponent<BaseInput>();
 
-    finalStats = stats;
-
+    finalStats = new Stats(stats);
+    originalStats = new Stats(stats);
     currGrip = stats.grip;
     defaultSidewaysFriction = frontLeftWheel.sidewaysFriction;
   }
@@ -71,7 +81,12 @@ public class Player : MonoBehaviour
     stats.currSpeed = rb.velocity.magnitude;
     rb.centerOfMass = transform.InverseTransformPoint(CenterOfMass.position);
 
+    wantsToDrift = Input.GetKey(KeyCode.W) && (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)) && Vector3.Dot(rb.velocity, transform.forward) > 0;
+
+    
     ApplyPowerups();
+
+    ApplySpeedUp();
 
     // 물리 조작
     if (canMove)
@@ -119,9 +134,10 @@ public class Player : MonoBehaviour
     }
     else if (Mathf.Abs(accelInput) > 0.01f)
     {
-      float motorTorque = finalStats.acceleration * accelInput;
-      rearLeftWheel.motorTorque = motorTorque;
-      rearRightWheel.motorTorque = motorTorque;
+      float motorForce = finalStats.acceleration * rb.mass;
+      float motorTorque = motorForce / 2;
+      rearLeftWheel.motorTorque = motorTorque * accelInput;
+      rearRightWheel.motorTorque = motorTorque * accelInput;
       rearLeftWheel.brakeTorque = 0;
       rearRightWheel.brakeTorque = 0;
     }
@@ -190,6 +206,28 @@ public class Player : MonoBehaviour
     }
   }
 
+  void ApplySpeedUp()
+  {
+    float elapsedTime = boosterDuration - currBoosterTime;
+    float t = Mathf.Clamp01(elapsedTime / boosterDuration);
+    if(currBoosterTime > 0)
+    {
+      currBoosterTime -= Time.fixedDeltaTime;
+      
+      finalStats.acceleration = originalStats.acceleration + boosterAccelAdd;
+
+      float boostForce = Mathf.Lerp(0, boosterSpeedAdd, t);
+      rb.AddForce(transform.forward * boostForce, ForceMode.Acceleration);
+    }
+    else
+    {
+      float revertTime = 1f;
+      float lerpRatio = Mathf.Clamp01((revertTime - elapsedTime) / revertTime);
+      finalStats.acceleration = originalStats.acceleration;
+      finalStats.acceleration = Mathf.Lerp(finalStats.acceleration, originalStats.acceleration, Time.fixedDeltaTime * 2.0f);
+    }
+  }
+
   void UpdateGroundedState()
   {
     int groundedCount = 0;
@@ -223,6 +261,18 @@ public class Player : MonoBehaviour
     finalStats.grip = Mathf.Clamp(finalStats.grip, 0f, 1f);
   }
 
+  void OnTriggerEnter(Collider other)
+  {
+    if (other.CompareTag("SpeedUp")) // 추후 태그 명 변경(Booster, Barrel 등)
+    {
+      Debug.Log("Trigger Detected");
+      currBoosterTime = boosterDuration;
+
+      //Vector3 boosterForce = transform.forward * boosterSpeedAdd * rb.mass;
+      //rb.AddForce(boosterForce, ForceMode.Impulse);
+    }
+  }
+
   void UpdateVisualWheels()
   {
     UpdateWheelPose(frontRightWheel, visualWheelsMesh[0].transform);
@@ -240,6 +290,7 @@ public class Player : MonoBehaviour
     wheelTransform.rotation = rot;
   }
 
+  
   public void AddPowerup(PowerUpEffect powerUpEffect) => activePowerupList.Add(powerUpEffect);
   public void SetCanMove(bool move) => canMove = move;
   public float GetMaxSpeed() => Mathf.Max(finalStats.limitSpeed, finalStats.reverseSpeed);

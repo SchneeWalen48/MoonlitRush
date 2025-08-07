@@ -27,6 +27,23 @@ public class Stats
   [Tooltip("Additional gravity for when the car is in the air.")]
   public float addedGravity;
 
+
+  public Stats() { }
+  public Stats(Stats original)
+  {
+    this.limitSpeed = original.limitSpeed;
+    this.acceleration = original.acceleration;
+    this.steer = original.steer;
+    this.brakeForce = original.brakeForce;
+    this.speed = original.speed;
+    this.reverseSpeed = original.reverseSpeed;
+    this.reverseAccel = original.reverseAccel;
+    this.AccelerationCurve = original.AccelerationCurve;
+    this.braking = original.braking;
+    this.dragTime = original.dragTime;
+    this.grip = original.grip;
+    this.addedGravity = original.addedGravity;
+  }
   public static Stats operator +(Stats a, Stats b)
   {
     return new Stats
