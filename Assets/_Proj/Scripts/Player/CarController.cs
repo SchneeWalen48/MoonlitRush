@@ -45,6 +45,26 @@ public class CarController : MonoBehaviour
   [SerializeField] private AnimationCurve turningCurve;
   [SerializeField] private float dragCoefficient;
 
+  [Header("Gear")]
+  [SerializeField, Range(1, 5)] private int maxGears = 5;
+  [SerializeField] private float[] gearSpeedPercents = new float[] { 0.18f, 0.36f, 0.56f, 0.78f, 1f };
+  [SerializeField] private float[] gearAccelMultipliers = new float[] { 1.8f, 1.5f, 1.25f, 1f, 0.8f };
+  [SerializeField] private float shiftLag = 0.15f;
+  [SerializeField] private float upshifHysteresis = 0.02f;
+  [SerializeField] private float minTimeBetweenShifts = 0.25f;
+
+  private int currGear = 1;
+  private float lastShiftTime = -999f;
+  private float gearLagTimer = 0f;
+  private float effectiveAccelMultiplier = 1f;
+
+  [Header("Reverse")]
+  [SerializeField] private float reverseEngageDelay = 0.35f;
+  [SerializeField] private float nearStopSpeed = 0.25f;
+  private enum ReverseState { None, Arming, Engaged }
+  private ReverseState reverseState = ReverseState.None;
+  private Coroutine reverseArmCo = null;
+
   [Header("Drift")]
   [SerializeField] private float driftDragMultiplier = 2f;
   [SerializeField] private float driftTransitionSpeed = 5f;
@@ -68,6 +88,7 @@ public class CarController : MonoBehaviour
   [Range(0, 1)] private float minPitch = 1f;
   [SerializeField]
   [Range(1, 5)] private float maxPitch = 5f;
+
 
   void Awake()
   {
@@ -264,24 +285,72 @@ public class CarController : MonoBehaviour
 
   void GetPlayerInput()
   {
-    moveInput = Input.GetAxis("Vertical");
+    float rawInput = Input.GetAxis("Vertical");
     steerInput = Input.GetAxis("Horizontal");
 
     isDrifting = Mathf.Abs(currCarLocalVel.z) > 1f && Mathf.Abs(steerInput) > 0.1f && Input.GetKey(KeyCode.LeftShift);
 
-    if(moveInput < -0.01f && Mathf.Abs(currCarLocalVel.z) < 0.1f && !readyToReverse)
+    bool wHeld = rawInput > 0.1f;
+    bool sHeld = rawInput < -0.1f;
+    float fwdSpeed = currCarLocalVel.z;
+
+    switch (reverseState)
     {
-      readyToReverse = true;
-      moveInput = 0;
+      case ReverseState.None:
+        if (sHeld)
+        {
+          if (Mathf.Abs(fwdSpeed) <= nearStopSpeed)
+          {
+            reverseState = ReverseState.Arming;
+            if (reverseArmCo != null) StopCoroutine(reverseArmCo);
+            reverseArmCo = StartCoroutine(Co_ArmReverse());
+          }
+        }
+        if (wHeld) { }
+        break;
+
+      case ReverseState.Arming:
+        if (!sHeld || wHeld || Mathf.Abs(fwdSpeed) > nearStopSpeed)
+        {
+          reverseState = ReverseState.None;
+          if (reverseArmCo != null) StopCoroutine(reverseArmCo);
+          reverseArmCo = null;
+        }
+        break;
+
+      case ReverseState.Engaged:
+        if (wHeld)
+          reverseState = ReverseState.None;
+        break;
+    }
+    if (reverseState == ReverseState.Engaged)
+    {
+      moveInput = sHeld ? -1f : 0f;
     }
     else
     {
-      if(moveInput > 0.01f)
-      {
-        readyToReverse = false;
-      }
-      moveInput = this.moveInput;
+      if (wHeld) moveInput = 1f;
+      else if (sHeld) moveInput = -1f; // 감속만
+      else moveInput = 0f;
     }
+  }
+
+  IEnumerator Co_ArmReverse()
+  {
+    float t = 0f;
+    while (t < reverseEngageDelay)
+    {
+      if (!(Input.GetAxis("Vertical") < -0.1f) || Mathf.Abs(currCarLocalVel.z) > nearStopSpeed)
+      {
+        reverseState = ReverseState.None;
+        reverseArmCo = null;
+        yield break;
+      }
+      t += Time.deltaTime;
+      yield return null;
+    }
+    reverseState = ReverseState.Engaged;
+    reverseArmCo = null;
   }
   #region Suspension
   void Suspension()
@@ -338,7 +407,6 @@ public class CarController : MonoBehaviour
     maxSpeed = originMaxSpeed * speedUpMaxSpeedMultiplier;
     currSpeed += acceleration;
 
-    rb.AddForce(Vector3.up * 5f, ForceMode.Acceleration);
     StartCoroutine(ResetSpeed());
   }
 
