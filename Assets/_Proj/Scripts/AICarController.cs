@@ -27,7 +27,7 @@ public class AICarController : MonoBehaviour
     public float driftFrictionStiffness = 0.5f; //드리프트 시 마찰력
 
     [Header("Barrel Roll Settings")]
-    public float barrelRollTorque = 500f; // 배럴롤 회전력
+    public float barrelRollTorque = 250f; // 배럴롤 회전력
     public float minBarrelRollSpeed = 100f; //배럴롤 최소 속도
     bool isBarrelRolling = false;
 
@@ -140,7 +140,7 @@ public class AICarController : MonoBehaviour
 
                 if (speedUp != null && speedUp != lastSpeedUp)
                 {
-                    speedUp.ApplySpeedUp(gameObject);
+                   // speedUp.ApplySpeedUp(gameObject);
                     lastSpeedUp = speedUp;
                 }
             }

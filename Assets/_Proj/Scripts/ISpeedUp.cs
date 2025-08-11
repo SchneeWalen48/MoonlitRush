@@ -6,4 +6,6 @@ using UnityEngine;
 public interface ISpeedUp
 {
     void ApplySpeedUp(GameObject car); //감지한 차량
+
+    //void ApplySpeedPadBoost(float force, float duration);
 }
