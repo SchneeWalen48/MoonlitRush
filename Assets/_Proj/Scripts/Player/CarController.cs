@@ -338,6 +338,7 @@ public class CarController : MonoBehaviour
     maxSpeed = originMaxSpeed * speedUpMaxSpeedMultiplier;
     currSpeed += acceleration;
 
+    rb.AddForce(Vector3.up * 5f, ForceMode.Acceleration);
     StartCoroutine(ResetSpeed());
   }
 
