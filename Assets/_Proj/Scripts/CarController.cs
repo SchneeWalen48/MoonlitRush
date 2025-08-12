@@ -52,6 +52,11 @@ public class CarController : MonoBehaviour
     [Header("Ray settings")] //감지 설정
     private float downDis = 1.5f;
 
+    [Header("Barrel Roll Settings")]
+    public float barrelRollTorque = 1000f; // 배럴롤 회전력 250f, 
+    public float barrelRollDuration = 3f; //배럴롤 지속 시간 1.5f
+    bool isBarrelRolling = false;
+
     //스피드 발판    
     Coroutine boostCoroutine;
     ISpeedUp lastSpeedUp;
@@ -84,9 +89,20 @@ public class CarController : MonoBehaviour
                     lastSpeedUp = speedUp;
                 }
             }
-            //점프대 감지
+            //배럴롤 점프대 감지
+            else if (downHit.collider.CompareTag("JumpRamp"))
+            {
+                if (isBarrelRolling == false)
+                {
+                    StartCoroutine(BarrelRollRoutine());
+                    Debug.Log("배럴롤 점프대");
+                }
+            }
+
         }
         else { lastSpeedUp = null; }
+
+        
 
         UpdateAIControls();
         Suspension();
@@ -149,12 +165,22 @@ public class CarController : MonoBehaviour
             isDrifting = false;
         }
 
-        if (isDrifting)
+        //코루틴으로 barrelRoll 상태가 true면 AddRelativeTorque 함수로 차량 회전
+        //if (isBarrelRolling)
+        //{
+        //    carRB.AddRelativeTorque(Vector3.right * barrelRollTorque, ForceMode.Acceleration); //z축 배럴롤 forward, x축 배럴롤 right
+        //    carRB.AddRelativeTorque(Vector3.forward * barrelRollTorque, ForceMode.Acceleration);
+        //    steerInput = 0;
+        //    moveInput = 0;
+        //}
+         if (isDrifting)
         {
             // 드리프트 중에는 조향 강도를 높임
             steerInput = Mathf.Clamp(localTarget.x / localTarget.magnitude, -1f, 1f) * 5.5f;
             moveInput = 0.5f;
-           // maxSpeed = 70f;
+            // maxSpeed = 70f;
+
+            
         }
         else // 드리프트 중이 아닐 때, 일반 주행 로직을 실행
         {
@@ -170,6 +196,8 @@ public class CarController : MonoBehaviour
             {//목표 속도에 도달하면 가속을 멈추거나 필요 시 감소
                 moveInput = 0f;
             }
+
+            
         }
 
 
@@ -279,7 +307,8 @@ public class CarController : MonoBehaviour
 
     private void Movement()
     {
-        if (isGrounded)
+        if(isBarrelRolling) return;
+       else if (isGrounded)
         {
             Accelerate();
             Decelerate();
@@ -338,6 +367,7 @@ public class CarController : MonoBehaviour
         }
     }
 
+    //스피드 발판 적용 코루틴
     public void ApplySpeedPadBoost(float force, float duration)
     {
         if (boostCoroutine != null)
@@ -355,5 +385,23 @@ public class CarController : MonoBehaviour
 
         Debug.Log("AI 스피드 패드 코루틴 끝");
         maxSpeed -= force;
+    }
+
+    //배럴롤 코루틴
+    IEnumerator BarrelRollRoutine()
+    {
+        isBarrelRolling = true;
+        Debug.Log("AI 배럴롤 시작");
+        //carRB.useGravity = false;        
+        carRB.AddRelativeTorque(Vector3.forward * barrelRollTorque, ForceMode.Acceleration);
+
+        yield return new WaitForSeconds(barrelRollDuration); //회전 시간 
+
+        isBarrelRolling = false;
+        Debug.Log("AI 배럴롤 종료");
+       // carRB.useGravity = true;
+
+        moveInput = 1f;
+
     }
 }
