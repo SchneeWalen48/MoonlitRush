@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CarController : MonoBehaviour
 {
-  public float currSpeed;
   #region References
   [Header("References")]
   [SerializeField] private Rigidbody rb;
@@ -29,13 +26,6 @@ public class CarController : MonoBehaviour
   int[] wheelIsGrounded = new int[4];
   bool isGrounded = false;
 
-  float originAccel;
-  float originMaxSpeed;
-
-  [SerializeField] private float speedUpAccelMultiplier = 1.5f;
-  [SerializeField] private float speedUpMaxSpeedMultiplier = 1.2f;
-  [SerializeField] private float speedUpDuration = 3f;
-
 
   [Header("Car Settings")]
   [SerializeField] private float acceleration = 25f;
@@ -44,26 +34,6 @@ public class CarController : MonoBehaviour
   [SerializeField] private float steerForce = 15f;
   [SerializeField] private AnimationCurve turningCurve;
   [SerializeField] private float dragCoefficient;
-
-  [Header("Gear")]
-  [SerializeField, Range(1, 5)] private int maxGears = 5;
-  [SerializeField] private float[] gearSpeedPercents = new float[] { 0.18f, 0.36f, 0.56f, 0.78f, 1f };
-  [SerializeField] private float[] gearAccelMultipliers = new float[] { 1.8f, 1.5f, 1.25f, 1f, 0.8f };
-  [SerializeField] private float shiftLag = 0.15f;
-  [SerializeField] private float upshifHysteresis = 0.02f;
-  [SerializeField] private float minTimeBetweenShifts = 0.25f;
-
-  private int currGear = 1;
-  private float lastShiftTime = -999f;
-  private float gearLagTimer = 0f;
-  private float effectiveAccelMultiplier = 1f;
-
-  [Header("Reverse")]
-  [SerializeField] private float reverseEngageDelay = 0.35f;
-  [SerializeField] private float nearStopSpeed = 0.25f;
-  private enum ReverseState { None, Arming, Engaged }
-  private ReverseState reverseState = ReverseState.None;
-  private Coroutine reverseArmCo = null;
 
   [Header("Drift")]
   [SerializeField] private float driftDragMultiplier = 2f;
@@ -77,7 +47,7 @@ public class CarController : MonoBehaviour
   float moveInput = 0;
   float steerInput = 0;
   bool isDrifting = false;
-  
+
   [Header("Visuals")]
   [SerializeField] private float tireRotSpeed = 3000f;
   [SerializeField] private float maxSteeringAngle = 30f;
@@ -89,19 +59,14 @@ public class CarController : MonoBehaviour
   [SerializeField]
   [Range(1, 5)] private float maxPitch = 5f;
 
-
   void Awake()
   {
     rb = GetComponent<Rigidbody>();
-
-    originAccel = acceleration;
-    originMaxSpeed = maxSpeed;
   }
 
   void Update()
   {
     GetPlayerInput();
-    currSpeed = rb.velocity.magnitude;
   }
 
   void FixedUpdate()
@@ -124,9 +89,9 @@ public class CarController : MonoBehaviour
         Acceleration();
         readyToReverse = false;
       }
-      else if(moveInput < -0.01f)
+      else if (moveInput < -0.01f)
       {
-        if(currCarLocalVel.z > -0.1f && readyToReverse)
+        if (currCarLocalVel.z > -0.1f && readyToReverse)
         {
           Acceleration();
         }
@@ -140,14 +105,25 @@ public class CarController : MonoBehaviour
         Deceleration();
       }
 
-        Turn();
+      Turn();
       SidewaysDrag();
     }
   }
 
   void Acceleration()
   {
-    rb.AddForceAtPosition(acceleration * moveInput * transform.forward, accelPoint.position, ForceMode.Acceleration);
+    
+    // 후륜 구동 : 뒷바퀴 1 (index 2)
+    if (tires.Length > 2)
+    {
+      rb.AddForceAtPosition(acceleration * moveInput * transform.forward, tires[2].transform.position, ForceMode.Acceleration);
+    }
+
+    // 뒷바퀴 2 (index 3)
+    if (tires.Length > 3)
+    {
+      rb.AddForceAtPosition(acceleration * moveInput * transform.forward, tires[3].transform.position, ForceMode.Acceleration);
+    }
   }
 
   void Deceleration()
@@ -160,9 +136,9 @@ public class CarController : MonoBehaviour
     float currSteerStrength = isDrifting ? steerForce * 1.5f : steerForce;
     rb.AddTorque(currSteerStrength * steerInput * turningCurve.Evaluate(Mathf.Abs(carVelRatio)) * Mathf.Sign(currCarLocalVel.z) * transform.up, ForceMode.Acceleration);
 
-    
+
   }
-  
+
   void SidewaysDrag()
   {
     float currSidewaysSpeed = currCarLocalVel.x;
@@ -185,9 +161,9 @@ public class CarController : MonoBehaviour
   void TireVisuals()
   {
     float steeringAngle = maxSteeringAngle * steerInput;
-    for(int i = 0; i < tires.Length; i++)
+    for (int i = 0; i < tires.Length; i++)
     {
-      if(i < 2)
+      if (i < 2)
       {
         tires[i].transform.Rotate(Vector3.right, tireRotSpeed * carVelRatio * Time.deltaTime, Space.Self);
 
@@ -202,7 +178,7 @@ public class CarController : MonoBehaviour
 
   void VFX()
   {
-    if(isGrounded && (isDrifting || Mathf.Abs(currCarLocalVel.x) > minSideSkidVel))
+    if (isGrounded && (isDrifting || Mathf.Abs(currCarLocalVel.x) > minSideSkidVel))
     {
       ToggleSkidMarks(true);
       ToggleSkidSmokes(true);
@@ -218,7 +194,7 @@ public class CarController : MonoBehaviour
 
   void ToggleSkidMarks(bool toggle)
   {
-    foreach(var skidMark in skidMarks)
+    foreach (var skidMark in skidMarks)
     {
       skidMark.emitting = toggle;
     }
@@ -226,7 +202,7 @@ public class CarController : MonoBehaviour
 
   void ToggleSkidSmokes(bool toggle)
   {
-    foreach(var smoke in skidFxs)
+    foreach (var smoke in skidFxs)
     {
       if (toggle)
       {
@@ -285,72 +261,24 @@ public class CarController : MonoBehaviour
 
   void GetPlayerInput()
   {
-    float rawInput = Input.GetAxis("Vertical");
+    moveInput = Input.GetAxis("Vertical");
     steerInput = Input.GetAxis("Horizontal");
 
     isDrifting = Mathf.Abs(currCarLocalVel.z) > 1f && Mathf.Abs(steerInput) > 0.1f && Input.GetKey(KeyCode.LeftShift);
 
-    bool wHeld = rawInput > 0.1f;
-    bool sHeld = rawInput < -0.1f;
-    float fwdSpeed = currCarLocalVel.z;
-
-    switch (reverseState)
+    if (moveInput < -0.01f && Mathf.Abs(currCarLocalVel.z) < 0.1f && !readyToReverse)
     {
-      case ReverseState.None:
-        if (sHeld)
-        {
-          if (Mathf.Abs(fwdSpeed) <= nearStopSpeed)
-          {
-            reverseState = ReverseState.Arming;
-            if (reverseArmCo != null) StopCoroutine(reverseArmCo);
-            reverseArmCo = StartCoroutine(Co_ArmReverse());
-          }
-        }
-        if (wHeld) { }
-        break;
-
-      case ReverseState.Arming:
-        if (!sHeld || wHeld || Mathf.Abs(fwdSpeed) > nearStopSpeed)
-        {
-          reverseState = ReverseState.None;
-          if (reverseArmCo != null) StopCoroutine(reverseArmCo);
-          reverseArmCo = null;
-        }
-        break;
-
-      case ReverseState.Engaged:
-        if (wHeld)
-          reverseState = ReverseState.None;
-        break;
-    }
-    if (reverseState == ReverseState.Engaged)
-    {
-      moveInput = sHeld ? -1f : 0f;
+      readyToReverse = true;
+      moveInput = 0;
     }
     else
     {
-      if (wHeld) moveInput = 1f;
-      else if (sHeld) moveInput = -1f; // 감속만
-      else moveInput = 0f;
-    }
-  }
-
-  IEnumerator Co_ArmReverse()
-  {
-    float t = 0f;
-    while (t < reverseEngageDelay)
-    {
-      if (!(Input.GetAxis("Vertical") < -0.1f) || Mathf.Abs(currCarLocalVel.z) > nearStopSpeed)
+      if (moveInput > 0.01f)
       {
-        reverseState = ReverseState.None;
-        reverseArmCo = null;
-        yield break;
+        readyToReverse = false;
       }
-      t += Time.deltaTime;
-      yield return null;
+      moveInput = this.moveInput;
     }
-    reverseState = ReverseState.Engaged;
-    reverseArmCo = null;
   }
   #region Suspension
   void Suspension()
@@ -358,8 +286,8 @@ public class CarController : MonoBehaviour
 
     for (int i = 0; i < rayPoints.Length; i++)
     {
-    RaycastHit hit;
-      float maxDistance = restLen + springTravel;
+      RaycastHit hit;
+      float maxDistance = restLen;
 
       if (Physics.Raycast(rayPoints[i].position, -rayPoints[i].up, out hit, maxDistance + wheelRadius, drivable))
       {
@@ -377,44 +305,17 @@ public class CarController : MonoBehaviour
 
         rb.AddForceAtPosition(netForce * rayPoints[i].up, rayPoints[i].position);
 
-        // [수정된 부분] 휠의 위치를 충돌 지점 (hit.point) 에서 휠의 반지름만큼 위로 올립니다.
-        SetTirePosition(tires[i], hit.point + rayPoints[i].up * wheelRadius);
+        SetTirePosition(tires[i], hit.point + rayPoints[i].up * wheelRadius / 2);
         Debug.DrawLine(rayPoints[i].position, hit.point, Color.red);
-      
-    }
+      }
       else
       {
         wheelIsGrounded[i] = 0;
 
-        SetTirePosition(tires[i], rayPoints[i].position - rayPoints[i].up * (restLen + springTravel));
-        Debug.DrawLine(rayPoints[i].position, rayPoints[i].position + maxDistance * -rayPoints[i].up, Color.green);
+        SetTirePosition(tires[i], rayPoints[i].position - rayPoints[i].up * (restLen + springTravel) * 0.9f);
+        Debug.DrawLine(rayPoints[i].position, rayPoints[i].position + (wheelRadius + maxDistance) * -rayPoints[i].up, Color.green);
       }
     }
   }
   #endregion
-
-  void OnTriggerEnter(Collider other)
-  {
-    if (other.CompareTag("SpeedUp"))
-    {
-      SpeedUp();
-    }
-  }
-
-  private void SpeedUp()
-  {
-    acceleration = originAccel * speedUpAccelMultiplier;
-    maxSpeed = originMaxSpeed * speedUpMaxSpeedMultiplier;
-    currSpeed += acceleration;
-
-    StartCoroutine(ResetSpeed());
-  }
-
-  IEnumerator ResetSpeed()
-  {
-    yield return new WaitForSeconds(speedUpDuration);
-    currSpeed -= acceleration;
-    acceleration = originAccel;
-    maxSpeed = originMaxSpeed;
-  }
 }
