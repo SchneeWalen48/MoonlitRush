@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEditor;
 using UnityEngine;
 
 public class CarController : MonoBehaviour
@@ -335,6 +334,7 @@ public class CarController : MonoBehaviour
 
     float fwdSpeed = Mathf.Max(0f, currCarLocalVel.z);
     float speedRatio = Mathf.Clamp01(fwdSpeed / Mathf.Max(0.01f, maxSpeed));
+
     float currTop = gearsPercents[Mathf.Clamp(currGear - 1, 0, max - 1)];
 
     if (!isHoldingTop)
@@ -428,6 +428,40 @@ public class CarController : MonoBehaviour
         SetTirePosition(tires[i], rayPoints[i].position - rayPoints[i].up * (restLen + springTravel) * 0.9f);
         Debug.DrawLine(rayPoints[i].position, rayPoints[i].position + (wheelRadius + maxDistance) * -rayPoints[i].up, Color.green);
       }
+    }
+  }
+  #endregion
+
+  #region Trigger
+  void OnTriggerEnter(Collider other)
+  {
+    float effectDuration = 0;
+    if (other.CompareTag("SpeedUp"))
+    {
+      Debug.Log($"감지 : {other.tag}");
+      if (acceleration + 20f >= maxSpeed) acceleration = Mathf.Min(acceleration + 20f, maxSpeed);
+      else { acceleration += 20f; }
+      effectDuration = 3f;
+      ApplyEffects(effectDuration);
+    }
+
+    if (other.CompareTag("Barrel"))
+    {
+      Debug.Log($"감지 : {other.tag}");
+      if (acceleration + 30f >= maxSpeed) acceleration = Mathf.Min(acceleration + 30f, maxSpeed);
+      else { acceleration += 30f; }
+      effectDuration = 4f;
+      ApplyEffects(effectDuration);
+    }
+  }
+
+  void ApplyEffects(float timer)
+  {
+    float originSpeed = acceleration;
+    timer -= Time.deltaTime;
+    if (timer <= 0)
+    {
+      acceleration = originSpeed;
     }
   }
   #endregion
