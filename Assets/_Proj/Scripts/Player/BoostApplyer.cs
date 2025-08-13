@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class BoostApplyer : MonoBehaviour
@@ -12,7 +11,6 @@ public class BoostApplyer : MonoBehaviour
 
   float boostEndTime = -1f;
   Coroutine fxRoutine;
-
   public void ApplyBoost(float duration, float sizeMul = 1f, float speedMul = 1f)
   {
     float newEnd = Time.time + Mathf.Max(0f, duration);
