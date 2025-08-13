@@ -4,8 +4,9 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - SpeedPad
   - JumpRamp
+  - SpeedUp
+  - AICom
   layers:
   - Default
   - TransparentFX

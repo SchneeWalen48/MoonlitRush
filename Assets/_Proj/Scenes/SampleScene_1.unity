@@ -2739,6 +2739,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: SpeedUpTest
       objectReference: {fileID: 0}
+    - target: {fileID: 6554055445302468001, guid: 43b41dcfe05a51645a82221edd04aa1d,
+        type: 3}
+      propertyPath: m_TagString
+      value: SpeedUp
+      objectReference: {fileID: 0}
     - target: {fileID: 7045453274978464137, guid: 43b41dcfe05a51645a82221edd04aa1d,
         type: 3}
       propertyPath: m_LocalPosition.x

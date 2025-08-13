@@ -23,7 +23,7 @@ public class SpeedUp : MonoBehaviour, ISpeedUp
     public void ApplySpeedUp(GameObject car)
     {
         //AI¿ë
-        var controller = car.GetComponentInParent<CarController>();
+        var controller = car.GetComponentInParent<AICarController_2>();
         if (controller != null)
         {
             controller.ApplySpeedPadBoost(boostForce, boostDuration);
