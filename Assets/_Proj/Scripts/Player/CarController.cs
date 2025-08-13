@@ -511,7 +511,7 @@ public class CarController : MonoBehaviour
         Debug.Log($"감지 : {other.tag}");
         if (boostApplyer != null)
         {
-          boostApplyer.ApplyBoost(2f, 1.1f, 1.5f);
+          boostApplyer.ApplyBoost(2f, 1.1f, 1.5f); // 시간, 크기, 속도
         };
         lv.z = Mathf.Max(lv.z, 28f); // 부스터 목표 속도 (m/s)
         rb.velocity = transform.TransformDirection(lv);
@@ -526,6 +526,17 @@ public class CarController : MonoBehaviour
         }
         lv.z = Mathf.Max(lv.z, 32f); // 배럴롤에는 좀 더 강하게
         rb.velocity = transform.TransformDirection(lv);
+      }
+
+      if (other.CompareTag("Boost"))
+      {
+        Debug.Log($"감지 : {other.tag}");
+        if(boostApplyer != null)
+        {
+          boostApplyer.ApplyBoost(2f, 1.1f, 2f);
+          lv.z = (Mathf.Max(lv.z, 25f));
+          rb.velocity = (transform.TransformDirection(lv));
+        }
       }
     }
   }
