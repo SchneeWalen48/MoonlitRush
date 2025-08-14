@@ -1,50 +1,63 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ItemSlot : MonoBehaviour
 {
   public SlotUI[] slotUIs;
-  public UseItem useItem;
+  public UseItem useItem; // 플레이어에 붙은 UseItem
 
   private ItemData[] itemSlots = new ItemData[2];
 
-  public void AddItem(ItemData newItem)
+  public bool AddItem(ItemData newItem)
   {
+    if (newItem == null) return false;
     if (itemSlots[0] == null)
     {
       itemSlots[0] = newItem;
+      UpdateUI();
+      return true;
     }
-    else if (itemSlots[1] == null)
+    if (itemSlots[1] == null)
     {
       itemSlots[1] = newItem;
+      UpdateUI();
+      return true;
     }
-    else
+    return false;
+  }
+  public void UpdateUI()
+  {
+    for(int i = 0; i < slotUIs.Length; i++)
     {
-      Debug.Log("Slots are full");
-      return;
+      ItemData data = (i < itemSlots.Length) ? itemSlots[i] : null;
+      slotUIs[i].SetItem(data);
     }
-    UpdateUI();
   }
 
   public void UseFirstItem()
   {
-    if (itemSlots[0] == null) return;
-    useItem.currItem = itemSlots[0];
-    useItem.Use();
-
-    itemSlots[0] = itemSlots[1];
-    itemSlots[1] = null;
-
-    UpdateUI();
+    UseSlot(0);
   }
 
-  private void UpdateUI()
+  public void UseSlot(int idx)
   {
-    for(int i = 0; i < slotUIs.Length; i++)
+    if (idx < 0 || idx > 1) return;
+    if (itemSlots[idx] == null) return;
+    if (useItem == null) return;
+
+    useItem.currItem = itemSlots[idx];
+    bool used = useItem.Use();
+    if (!used) return;
+
+    if (idx == 0)
     {
-      if(i < slotUIs.Length)
-        slotUIs[i].SetItem(itemSlots[i]);
+      itemSlots[0] = itemSlots[1];
+      itemSlots[1] = null;
     }
+    else
+    {
+      itemSlots[1] = null;
+    }
+
+    UpdateUI();
   }
 }
