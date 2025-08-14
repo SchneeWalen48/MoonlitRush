@@ -419,8 +419,18 @@ public class AICarController_2 : MonoBehaviour
         }
         else if (other.CompareTag("Goal"))
         {
-            Debug.Log("완주!");
+            Debug.Log("완주!");            
+            moveInput = 0;
+            steerInput = 0;
+
+            carRB.drag = 20;
+            carRB.angularDrag = 20;
+            //carRB.isKinematic = true;
             final.Finish();
+        }
+        else if (other.CompareTag("ItemBooster"))
+        {
+            other.gameObject.SetActive(false);
         }
     }
 

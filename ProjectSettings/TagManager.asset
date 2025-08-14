@@ -10,6 +10,9 @@ TagManager:
   - Boost
   - Barrel
   - Goal
+  - ItemBooster
+  - ItemMissile
+  - ItemShield
   layers:
   - Default
   - TransparentFX

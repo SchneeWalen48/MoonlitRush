@@ -12,12 +12,17 @@ public class FinalCount : MonoBehaviour
 
     private bool isGameEnding = false;
 
+    private void Awake()
+    {
+        finalCountText.gameObject.SetActive(false);
+    }
+
     public void Finish()
     {
         if (isGameEnding == false) {
         isGameEnding = true;
             Debug.Log("카운트 시작");
-
+            finalCountText.gameObject.SetActive(true);
             StartCoroutine(EndCount());
         }
     }
