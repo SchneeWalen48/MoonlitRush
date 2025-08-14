@@ -26,6 +26,7 @@ public class CarController : MonoBehaviour
   [SerializeField] private float springTravel = 0.5f;
   [SerializeField] private float wheelRadius = 0.33f;
   #endregion
+  
   int[] wheelIsGrounded = new int[4];
   bool isGrounded = false;
 
@@ -33,6 +34,7 @@ public class CarController : MonoBehaviour
   [SerializeField] private float reverseMaxSpeed = 5f;
   [SerializeField] private float reverseAccel = 1f;
 
+  #region Car Settings
   [Header("Car Settings")]
   public float acceleration = 25f;
   [SerializeField] private float maxSpeed = 100f;
@@ -40,6 +42,7 @@ public class CarController : MonoBehaviour
   [SerializeField] private float steerForce = 15f;
   [SerializeField] private AnimationCurve turningCurve;
   [SerializeField] private float dragCoefficient;
+  #endregion
 
   #region Gear Settings
   [Header("Gear")]
@@ -55,6 +58,13 @@ public class CarController : MonoBehaviour
   private bool didDropBeforeShift = false; // 변속 전 속도 떨어뜨렸는지
   #endregion
 
+  #region Car Weight Settings
+  [Header("Weight Feel (Minimal)")]
+  [SerializeField] private float baseDownforce = 1000f;
+  [SerializeField] private float downforcePerMS = 1.0f; // 속도(m/s)당 추가 눌림
+  [SerializeField] private float maxDownforce = 3000f;  // 과접지 방지 캡(상한)
+  #endregion
+  
   [Header("Drift")]
   [SerializeField] private float driftDragMultiplier = 2f;
   [SerializeField] private float driftTransitionSpeed = 5f;
@@ -68,7 +78,7 @@ public class CarController : MonoBehaviour
   float steerInput = 0;
   bool isDrifting = false;
 
-  #region Airbourne
+  #region Airbourne Settings
   [Header("Airbourne Settings")]
   [SerializeField, Range(0, 1)] private float airGravity = 0.4f;
   [SerializeField] private float airGravityDuration = 1f;
@@ -80,26 +90,30 @@ public class CarController : MonoBehaviour
   private bool isAir = true;
   #endregion
 
-  #region Barrel Roll
-  
+  #region Barrel Roll Settings
+
 
   #endregion
 
-  [Header("Weight Feel (Minimal)")]
-  [SerializeField] private float baseDownforce = 300f;
-  [SerializeField] private float downforcePerMS = 0.6f; // 속도(m/s)당 추가 눌림
-  [SerializeField] private float maxDownforce = 1000f;  // 과접지 방지 캡
+  #region Item Slot Settings
+  [SerializeField] private ItemSlot itemSlot;
+  public bool alsoRightCtrl = true;
+  #endregion
 
+  #region Visuals Settings
   [Header("Visuals")]
   [SerializeField] private float tireRotSpeed = 3000f;
   [SerializeField] private float maxSteeringAngle = 30f;
   [SerializeField] private float minSideSkidVel = 10f;
+  #endregion
 
+  #region Audio Settings
   [Header("Audio")]
   [SerializeField]
   [Range(0, 1)] private float minPitch = 1f;
   [SerializeField]
   [Range(1, 5)] private float maxPitch = 5f;
+  #endregion
 
   void Awake()
   {
@@ -110,6 +124,10 @@ public class CarController : MonoBehaviour
   {
     GetPlayerInput();
     currSpeed = rb.velocity.magnitude;
+    if (Input.GetKeyDown(KeyCode.LeftControl) || (alsoRightCtrl && Input.GetKeyDown(KeyCode.RightControl)))
+    {
+      itemSlot?.UseFirstItem();
+    }
   }
 
   void FixedUpdate()
@@ -528,7 +546,7 @@ public class CarController : MonoBehaviour
         rb.velocity = transform.TransformDirection(lv);
       }
 
-      if (other.CompareTag("Boost"))
+      if (other.CompareTag("BoostPad"))
       {
         Debug.Log($"감지 : {other.tag}");
         if(boostApplyer != null)
