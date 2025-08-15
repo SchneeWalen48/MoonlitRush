@@ -16,51 +16,27 @@ public class ItemCollector : MonoBehaviour
 
     if (!other.CompareTag("ItemBooster") && !other.CompareTag("ItemShield") && !other.CompareTag("ItemMissile")) return;
 
-    Debug.Log("Trigger with: " + other.tag);
     var pick = other.GetComponent<PickupItem>();
+    if (pick == null || pick.itemData == null) return;
 
-    // 데이터 선택 로직
-    ItemData data = null;
-    if (pick != null && pick.itemData != null) data = pick.itemData;
-    else
-    {
-      if (other.CompareTag("ItemBooster")) data = defaultBooster;
-      else if (other.CompareTag("ItemShield")) data = defaultShield;
-      //else if (other.CompareTag("ItemMissile")) data = defaultMissile;
-    }
-    
-    if (data == null || itemSlots == null) return;
+    bool added = itemSlots.AddItem(pick.itemData);
+    if(!added) return;
 
-
-    // 성공 시에만 이어서 파괴/리스폰 진행
-    if(itemSlots.AddItem(data)) return;
-
-    Vector3 pos = other.transform.position;
-    Quaternion rot = other.transform.rotation;
-
-    if(pick != null && pick.itemboxPrefab)
-    {
-      Destroy(other.gameObject);
-      StartCoroutine(BoxRespawnCoroutine(pick.itemboxPrefab, pos, rot, pick.respawnDelay, other.tag));
-    }
-    else
-    {
-      // 프리팹 미지정 시 : 비활성 -> 3초 후 활성
-      StartCoroutine(DisEnableCoroutine(other.gameObject, 3f));
-    }
+    StartCoroutine(BoxRespawnCoroutine(other.gameObject, pick));
   }
 
-  IEnumerator BoxRespawnCoroutine(GameObject prefab, Vector3 pos, Quaternion rot, float delay, string tagName)
+  IEnumerator BoxRespawnCoroutine(GameObject box, PickupItem pick)
   {
-    yield return new WaitForSeconds(delay);
-    var go = Object.Instantiate(prefab, pos, rot);
-    go.tag = tagName;
-  }
+    Vector3 pos = box.transform.position;
+    Quaternion rot = box.transform.rotation;
 
-  IEnumerator DisEnableCoroutine(GameObject go, float delay)
-  {
-    go.SetActive(false);
-    yield return new WaitForSeconds(delay);
-    go.SetActive(true);
+    box.SetActive(false);
+
+    yield return new WaitForSeconds(pick.respawnDelay);
+
+    box.transform.position = pos;
+    box.transform.rotation = rot;
+    pick.ResetVisual();
+    box.SetActive(true);
   }
 }
