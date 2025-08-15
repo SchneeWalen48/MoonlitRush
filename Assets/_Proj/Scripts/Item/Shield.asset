@@ -15,7 +15,7 @@ MonoBehaviour:
   itemName: Shield
   description: 
   type: 2
-  icon: {fileID: 21300000, guid: 022300427f89ee847b5f5e346df42cb3, type: 3}
+  icon: {fileID: 21300000, guid: 5e22e8a6e78fa504e81e6d6e904f18b5, type: 3}
   fxPrefab: {fileID: 2075026485668607482, guid: 66b7b7b132d80bc4cb51f1052c465638,
     type: 3}
   duration: 3
