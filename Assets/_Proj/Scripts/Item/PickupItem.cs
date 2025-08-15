@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
-public class PickupItem : MonoBehaviour
+// 아이템박스에 부착
+public class PickupItem : MonoBehaviour 
 {
   public ItemData itemData;
   public float respawnDelay = 3f;
