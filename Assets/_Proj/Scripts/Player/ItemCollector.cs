@@ -17,10 +17,13 @@ public class ItemCollector : MonoBehaviour
     if (!other.CompareTag("ItemBooster") && !other.CompareTag("ItemShield") && !other.CompareTag("ItemMissile")) return;
 
     var pick = other.GetComponent<PickupItem>();
-    if (pick == null || pick.itemData == null) return;
+    if (pick == null) return;
 
-    bool added = itemSlots.AddItem(pick.itemData);
-    if(!added) return;
+    bool added = false;
+    if(pick.itemData != null && itemSlots != null)
+    {
+        added = itemSlots.AddItem(pick.itemData);
+    }
 
     StartCoroutine(BoxRespawnCoroutine(other.gameObject, pick));
   }
