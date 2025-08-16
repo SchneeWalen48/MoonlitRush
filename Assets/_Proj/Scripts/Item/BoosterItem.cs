@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
-using UnityEngine.WSA;
 
 public class BoosterItem : MonoBehaviour
 {
@@ -18,16 +16,20 @@ public class BoosterItem : MonoBehaviour
     isBoost = true;
 
     var controller = GetComponent<CarController>();
-    if (controller != null)
-      //controller.ApplyBoost(power);
+    if (controller != null && controller.boostApplyer != null)
+    {
+      controller.boostApplyer.ApplyBoost(duration, 1.1f, power);
+
+      Rigidbody rb = controller.GetComponent<Rigidbody>();
+      Vector3 lv = controller.transform.InverseTransformDirection(rb.velocity);
+      lv.z = Mathf.Max(lv.z, 25f);
+      rb.velocity = controller.transform.TransformDirection(lv);
+    }
 
     if (fx != null)
       Instantiate(fx, transform.position, Quaternion.identity, transform);
 
     yield return new WaitForSeconds(duration);
-
-    if (controller != null)
-      //controller.ResetSpeed();
 
     isBoost = false;
   }

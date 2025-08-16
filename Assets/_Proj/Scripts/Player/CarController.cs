@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 public class CarController : MonoBehaviour
@@ -15,7 +16,7 @@ public class CarController : MonoBehaviour
   [SerializeField] private TrailRenderer[] skidMarks = new TrailRenderer[2];
   [SerializeField] private ParticleSystem[] skidFxs = new ParticleSystem[2];
   [SerializeField] private AudioSource engineSound, skidSound;
-  [SerializeField] private BoostApplyer boostApplyer;
+  public BoostApplyer boostApplyer;
   #endregion
 
   #region Suspension
@@ -26,8 +27,10 @@ public class CarController : MonoBehaviour
   [SerializeField] private float springTravel = 0.5f;
   [SerializeField] private float wheelRadius = 0.33f;
   #endregion
+  
   int[] wheelIsGrounded = new int[4];
   bool isGrounded = false;
+  public bool isInvincible { get; set; }
 
   [Header("Reverse")]
   [SerializeField] private float reverseMaxSpeed = 5f;
@@ -55,6 +58,7 @@ public class CarController : MonoBehaviour
   private bool didDropBeforeShift = false; // 변속 전 속도 떨어뜨렸는지
   #endregion
 
+  #region Drfit Settings
   [Header("Drift")]
   [SerializeField] private float driftDragMultiplier = 2f;
   [SerializeField] private float driftTransitionSpeed = 5f;
@@ -67,6 +71,7 @@ public class CarController : MonoBehaviour
   float moveInput = 0;
   float steerInput = 0;
   bool isDrifting = false;
+  #endregion
 
   #region Airbourne
   [Header("Airbourne Settings")]
@@ -496,6 +501,21 @@ public class CarController : MonoBehaviour
   }
   #endregion
 
+  public IEnumerator HitByMissileCoroutine()
+  {
+    if (isInvincible) yield break;
+
+    rb.velocity *= 0.3f;
+
+    rb.AddForce(Vector3.up * 8f, ForceMode.VelocityChange);
+
+    float originDrag = rb.drag;
+    rb.drag = 0.5f;
+
+    yield return new WaitForSeconds(2f); // 2초간 공중 상태
+
+    rb.drag = originDrag;
+  }
   #region Trigger
   void OnTriggerEnter(Collider other)
   {
