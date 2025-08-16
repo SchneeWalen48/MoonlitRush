@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class ItemCollector : MonoBehaviour
@@ -9,10 +8,11 @@ public class ItemCollector : MonoBehaviour
   [Tooltip("PickupItem에 itemData없을때 사용하는 Scriptable Object")]
   public ItemData defaultBooster;
   public ItemData defaultShield;
+  public ItemData defaultMissile;
 
   void OnTriggerEnter(Collider other)
   {
-    Debug.Log("Trigger Enter with: " + other.name + " | Tag: " + other.tag);
+    Debug.Log("Tag: " + other.tag);
 
     if (!other.CompareTag("ItemBooster") && !other.CompareTag("ItemShield") && !other.CompareTag("ItemMissile")) return;
 

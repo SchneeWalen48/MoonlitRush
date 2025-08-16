@@ -15,7 +15,7 @@ MonoBehaviour:
   itemName: Booster
   description: 
   type: 0
-  icon: {fileID: 21300000, guid: 4381dd32db7e2004c95778202a13a36e, type: 3}
+  icon: {fileID: 21300000, guid: ffc4bc2ae0621964485f950323a41ec0, type: 3}
   fxPrefab: {fileID: 0}
   duration: 3
   power: 20

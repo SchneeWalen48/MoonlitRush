@@ -17,16 +17,26 @@ public class ShieldItem : MonoBehaviour
 
   IEnumerator ShieldCoroutine(float duration, GameObject fx)
   {
+    isShield = true;
+
+    var controller = GetComponent<CarController>();
+    if (controller != null)
+      controller.isInvincible = true;
+
     if(fx != null)
     {
+      Debug.Log("쉴드 이펙트 생성됨!");
       fxPrefab = Instantiate(fx, transform.position, Quaternion.identity, transform);
     }
 
-    //TODO : 무적 처리
-
     yield return new WaitForSeconds(duration);
 
-    if (fx != null)
+    if(controller != null)
+    {
+      controller.isInvincible = false;
+    }
+
+    if (fxPrefab != null)
     {
       Destroy(fxPrefab);
     }

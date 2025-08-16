@@ -20,9 +20,9 @@ public class UseItem : MonoBehaviour
       case ItemType.Booster:
         GetComponent<BoosterItem>()?.Activate(currItem);
         break;
-      //case ItemType.Missile:
-      //  GetComponent<MissileItem>()?.Activate(currItem);
-      //  break;
+      case ItemType.Missile:
+        GetComponent<MissileItem>()?.Activate(currItem);
+        break;
       case ItemType.Shield:
         GetComponent<ShieldItem>()?.Activate(currItem);
         break;

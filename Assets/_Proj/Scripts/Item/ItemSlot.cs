@@ -9,6 +9,14 @@ public class ItemSlot : MonoBehaviour
 
   private ItemData[] itemSlots = new ItemData[2];
 
+  void Update()
+  {
+    if (Input.GetKeyDown(KeyCode.LeftControl))
+    {
+      UseFirstItem();
+    }
+  }
+
   public bool AddItem(ItemData newItem)
   {
     if (newItem == null) return false;
