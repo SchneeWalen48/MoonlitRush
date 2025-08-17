@@ -6,28 +6,30 @@ public class MissileProj : MonoBehaviour
 {
   private Rigidbody rb;
   private GameObject me;
-  private CarController target;
+  private Transform target;
+
   public float speed;
   public float lifeTime;
   public float detectRadius = 30f;
-
   public GameObject explosionFx;
 
-  public void Init(float power, float duration, GameObject shooter)
+  public void Init(float power, float duration, GameObject shooter, GameObject fxPrefab)
   {
     rb = GetComponent<Rigidbody>();
     speed = power; // ItemData에서 덮어씀
     me = shooter; // ItemData에서 덮어씀
     lifeTime = duration;
-    if (rb != null) rb.velocity = transform.forward * speed;
+    explosionFx = fxPrefab;
 
     Collider myCol = GetComponent<Collider>();
     Collider shooterCol = shooter.GetComponent<Collider>();
 
     if(myCol != null && shooterCol != null)
-    {
       Physics.IgnoreCollision(myCol, shooterCol);
-    }
+    
+    if(rb!= null)
+      rb.velocity = transform.forward * speed;
+
     Destroy(gameObject, lifeTime);
   }
 
@@ -35,26 +37,31 @@ public class MissileProj : MonoBehaviour
   {
     if (rb == null) return;
 
-    if(target == null)
+    // 가장 가까운 ai 탐색
+    if (target == null)
     {
-      Collider[] hits = Physics.OverlapSphere(transform.position, detectRadius);
-      foreach(var hit in hits)
+      GameObject[] aiPlayers = GameObject.FindGameObjectsWithTag("AIPlayer");
+      float minDist = float.MaxValue;
+
+      foreach (var hit in aiPlayers)
       {
-        CarController car = hit.GetComponent<CarController>();
-        if(car != null && hit.gameObject != me)
+        float dist = Vector3.Distance(transform.position, hit.transform.position);
+        if (dist < detectRadius && dist < minDist)
         {
-          target = car;
-          break;
+          target = hit.transform;
+          minDist = dist;
         }
       }
     }
 
+    // 타깃 발견 시 추적
     if (target != null)
     {
-      Vector3 dir = (target.transform.position - transform.position).normalized;
+      Vector3 dir = (target.position - transform.position).normalized;
       rb.velocity = dir * speed;
       transform.forward = rb.velocity;
     }
+    // 타겟 없으면 직선
     else
     {
       rb.velocity = transform.forward * speed;
@@ -63,19 +70,20 @@ public class MissileProj : MonoBehaviour
 
   void OnCollisionEnter(Collision collision)
   {
-    CarController car = collision.gameObject.GetComponent<CarController>();
-    if (car != null)
-    {
+    print("충돌 " + collision.gameObject.name);
+    if (collision.gameObject == me) return;
 
-      car.StartCoroutine(car.HitByMissileCoroutine());
-    }
     if(explosionFx != null)
     {
+      print("explosion fx");
       GameObject fx = Instantiate(explosionFx, transform.position, Quaternion.identity);
       Destroy(fx, 2f);
     }
+    else
+    {
+      print("explosion fx is null");
+    }
 
-    Destroy(gameObject);
-
+      Destroy(gameObject);
   }
 }

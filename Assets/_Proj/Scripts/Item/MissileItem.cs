@@ -2,13 +2,16 @@
 
 public class MissileItem : MonoBehaviour
 {
-  public Transform firePoint;
-  public GameObject missilePrefab;
+  public Transform shotPoint;
+  public GameObject missilePrefab; // Rigidbody + MissileProj 컴포넌트 가진 오브젝트
 
   public void Activate(ItemData data)
   {
-    if (missilePrefab == null) return;
-    Debug.Log("Activate 호출됨 by " + gameObject.name + "at" + Time.time);
+    if (missilePrefab == null)
+    {
+      print("미사일 할당 안 됨");
+      return;
+    }
     
     if (data.fxPrefab == null)
     {
@@ -16,16 +19,14 @@ public class MissileItem : MonoBehaviour
       return;
     }
 
-    GameObject missile = Instantiate(missilePrefab, firePoint.position, firePoint.rotation);
+    GameObject missile = Instantiate(missilePrefab, shotPoint.position, shotPoint.rotation);
     Debug.Log(missile);
-    Rigidbody rb = missile.GetComponent<Rigidbody>();
-    Debug.Log("rigidbody" + (rb != null));
 
     MissileProj proj = missile.GetComponent<MissileProj>();
     Debug.Log("Proj?" + (proj!=null));
     if(proj != null)
     {
-      proj.Init(data.power, data.duration, gameObject);
+      proj.Init(data.power, data.duration, gameObject, data.fxPrefab);
     }
   }
 }
