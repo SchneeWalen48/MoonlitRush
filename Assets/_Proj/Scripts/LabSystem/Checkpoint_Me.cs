@@ -9,7 +9,7 @@ public class Checkpoint_Me : MonoBehaviour
 
     private void Start()
     {
-    RaceManager.Instance.RegisterCheckpoint(this);
+   // RaceManager.Instance.RegisterCheckpoint(this);
         
     }
 
@@ -20,7 +20,7 @@ public class Checkpoint_Me : MonoBehaviour
         RacerInfo racer = other.GetComponentInParent<RacerInfo>();
         if (racer != null)
         {
-            racer.lapCounter.PassCheckpoint(checkpointIndex);
+         //   racer.lapCounter.PassCheckpoint(checkpointIndex);
         }
     }
 }

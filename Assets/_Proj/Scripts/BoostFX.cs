@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class BoostFX : MonoBehaviour
@@ -17,61 +16,83 @@ public class BoostFX : MonoBehaviour
   public float boostStartSize = 1f;
   public float boostStartSpeed = 5f;
 
-  private bool isBoosting = false;
-  private float boostTimer;
-
   ParticleSystem.MainModule main;
 
   void Start()
   {
-    ApplyNormalState();
+    if (boostTrail == null) boostTrail = GetComponent<ParticleSystem>();
+    main = boostTrail.main;
+    ApplyNormalImmediate();
   }
 
-  void Update()
+  public void LerpToBoost(float t, float sizeMul = 1f, float speedMul = 1f)
   {
-    if (isBoosting)
+    StopAllCoroutines();
+    StartCoroutine(CoLerp(
+      fromColor: GetCurrColor(),
+      toColor: boostColor,
+      fromSize: GetCurrSize(),
+      toSize: boostStartSize * sizeMul,
+      fromSpeed: GetCurrSpeed(),
+      toSpeed: boostStartSpeed * speedMul,
+      time: t));
+  }
+
+  public void LerpToNormal(float t)
+  {
+    StopAllCoroutines();
+    StartCoroutine(CoLerp(
+      fromColor: GetCurrColor(),
+      toColor: normalColor,
+      fromSize: GetCurrSize(),
+      toSize: normalStartSize,
+      fromSpeed: GetCurrSpeed(),
+      toSpeed: normalStartSpeed,
+      time: t));
+  }
+
+  void ApplyNormalImmediate()
+  {
+    main.startColor = new ParticleSystem.MinMaxGradient(normalColor);
+    main.startSize = normalStartSize;
+    main.startSpeed = normalStartSpeed;
+  }
+
+  IEnumerator CoLerp(Color fromColor, Color toColor, float fromSize, float toSize, float fromSpeed, float toSpeed, float time)
+  {
+    float t0 = 0f;
+    while (t0 < time)
     {
-      boostTimer -= Time.deltaTime;
-      if (boostTimer <= 0f)
-      {
-        EndBoost();
-      }
+      float a = time <= 0f ? 1f : t0 / time;
+      main.startColor = new ParticleSystem.MinMaxGradient(Color.Lerp(fromColor, toColor, a));
+      main.startSize = Mathf.Lerp(fromSize, toSize, a);
+      main.startSpeed = Mathf.Lerp(fromSpeed, toSpeed, a);
+      t0 += Time.deltaTime;
+      yield return null;
     }
+    main.startColor = new ParticleSystem.MinMaxGradient(toColor);
+    main.startSize = toSize;
+    main.startSpeed = toSpeed;
   }
 
-  public void StartBoost(float duration)
-  {
-    boostTimer = duration;
-    isBoosting = true;
+  Color GetCurrColor() => ((ParticleSystem.MinMaxGradient)main.startColor).color;
+  float GetCurrSize() => main.startSize.constant;
+  float GetCurrSpeed() => main.startSpeed.constant;
 
-    ApplyBoostState();
-  }
-
-  private void EndBoost()
+  public void SetEmission(bool on)
   {
-    isBoosting = false;
-    ApplyNormalState();
-  }
+    if (boostTrail == null) return;
 
-  private void ApplyNormalState()
-  {
-    if (boostTrail != null)
+    var em = boostTrail.emission;
+    em.enabled = on;
+
+    if (on)
     {
-      var main = boostTrail.main;
-      main.startColor = normalColor;
-      main.startSize = normalStartSize;
-      main.startSpeed = normalStartSpeed;
+      if (!boostTrail.isPlaying) boostTrail.Play();
     }
-  }
-
-  private void ApplyBoostState()
-  {
-    if (boostTrail != null)
+    else
     {
-      var main = boostTrail.main;
-      main.startColor = boostColor;
-      main.startSize = boostStartSize;
-      main.startSpeed = boostStartSpeed;
+      if (boostTrail.isPlaying) boostTrail.Stop();
     }
   }
 }

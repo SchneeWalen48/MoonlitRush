@@ -8,7 +8,8 @@ public class FinalCount : MonoBehaviour
     public TextMeshProUGUI finalCountText;
 
    // public CarController playerCar;
-    public AICarController_2 AICar;
+    public AICarController AICar;
+    
 
     private bool isGameEnding = false;
 

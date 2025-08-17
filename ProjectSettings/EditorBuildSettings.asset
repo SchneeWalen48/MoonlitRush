@@ -9,6 +9,6 @@ EditorBuildSettings:
     path: Assets/_Proj/Scenes/Lobby.unity
     guid: 62b7a22f80e954b4ab443362afccf152
   - enabled: 1
-    path: Assets/_Proj/Scenes/SampleScene_1.unity
+    path: Assets/_Proj/Scenes_1/SampleScene_1.unity
     guid: c292e92932462284ea1606bdb47df9fc
   m_configObjects: {}

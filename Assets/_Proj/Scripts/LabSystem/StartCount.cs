@@ -9,7 +9,8 @@ public class StartCount : MonoBehaviour
     public TextMeshProUGUI startCountText;
 
    //public CarController playerCar;
-    public AICarController_2 AICar;
+    public AICarController AICar;
+    
 
     private void Start()
     {
@@ -18,18 +19,22 @@ public class StartCount : MonoBehaviour
 
     IEnumerator CountRoutine()
     {
+        Time.timeScale = 0;
+
         SetMovement(false);
 
         for(int i = 3; i > 0; i--)
         {
             startCountText.text = i.ToString();
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSecondsRealtime(1f);
         }
 
         startCountText.text = "GO!";
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSecondsRealtime(1f);
 
         startCountText.text = "";
+
+        Time.timeScale = 1;
 
         SetMovement(true);
     }
@@ -44,6 +49,7 @@ public class StartCount : MonoBehaviour
 
         if (AICar != null) {
             AICar.moveStart = movement;
+           
         }
     }
 }

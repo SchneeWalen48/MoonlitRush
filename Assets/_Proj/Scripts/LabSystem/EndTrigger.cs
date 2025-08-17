@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class EndTrigger : MonoBehaviour
 {
-    private float activeDelay = 15f;
     private BoxCollider collider;
 
     private void Awake()
@@ -17,12 +16,10 @@ public class EndTrigger : MonoBehaviour
         if(collider != null)
         {
             collider.enabled = false;
-        }
-
-        Invoke("ActiveTrigger", activeDelay);
+        }        
     }
 
-    void ActiveTrigger()
+   public void ActiveTrigger()
     {
         if (collider != null)
         {
