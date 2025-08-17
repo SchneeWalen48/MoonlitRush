@@ -16,7 +16,7 @@ public class ItemCollector : MonoBehaviour
 
     if (!other.CompareTag("ItemBooster") && !other.CompareTag("ItemShield") && !other.CompareTag("ItemMissile")) return;
 
-    var pick = other.GetComponent<PickupItem>();
+    var pick = other.GetComponent<ItemBox>();
     if (pick == null) return;
 
     bool added = false;
@@ -28,7 +28,7 @@ public class ItemCollector : MonoBehaviour
     StartCoroutine(BoxRespawnCoroutine(other.gameObject, pick));
   }
 
-  IEnumerator BoxRespawnCoroutine(GameObject box, PickupItem pick)
+  IEnumerator BoxRespawnCoroutine(GameObject box, ItemBox pick)
   {
     Vector3 pos = box.transform.position;
     Quaternion rot = box.transform.rotation;
