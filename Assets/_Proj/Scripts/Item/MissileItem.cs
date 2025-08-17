@@ -20,6 +20,7 @@ public class MissileItem : MonoBehaviour
     }
 
     GameObject missile = Instantiate(missilePrefab, shotPoint.position, shotPoint.rotation);
+    missile.transform.localRotation = missilePrefab.transform.localRotation;
     Debug.Log(missile);
 
     MissileProj proj = missile.GetComponent<MissileProj>();

@@ -16,7 +16,7 @@ MonoBehaviour:
   description: 
   type: 1
   icon: {fileID: 21300000, guid: 2668bdc2b82135e47bdd0bf98877c14b, type: 3}
-  fxPrefab: {fileID: 1980743485029828, guid: 55c86e0c7bf19d545acec6387f8704db, type: 3}
+  fxPrefab: {fileID: 1722081097931586, guid: 4b21d5ab091be5a46ad6e87699fab62c, type: 3}
   duration: 3
   power: 10
   useSound: {fileID: 0}
