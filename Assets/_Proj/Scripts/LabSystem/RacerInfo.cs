@@ -18,4 +18,5 @@ public class RacerInfo : MonoBehaviour
     {
         RaceManager.Instance.RegisterRacer(this);
     }
+    //
 }
