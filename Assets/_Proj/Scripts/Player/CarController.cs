@@ -560,7 +560,7 @@ public class CarController : MonoBehaviour
         if(boostApplyer != null)
         {
           boostApplyer.ApplyBoost(2f, 1.1f, 2f);
-          lv.z = (Mathf.Max(lv.z, 25f));
+          lv.z = (Mathf.Max(lv.z, 19f));
           rb.velocity = (transform.TransformDirection(lv));
         }
       }
@@ -568,6 +568,7 @@ public class CarController : MonoBehaviour
   }
   #endregion
 
+  #region Barrel Roll Coroutine
   IEnumerator BarrelRollCoroutine()
   {
     Vector3 lv = transform.InverseTransformDirection(rb.velocity);
@@ -595,4 +596,5 @@ public class CarController : MonoBehaviour
 
     moveInput = 1f;
   }
+  #endregion
 }
