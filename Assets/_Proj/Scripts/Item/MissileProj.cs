@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Unity.Android.Types;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class MissileProj : MonoBehaviour
@@ -12,7 +13,7 @@ public class MissileProj : MonoBehaviour
   public float lifeTime;
   public float detectRadius = 30f;
   private GameObject explosionFx;
-  [SerializeField] private bool debugTestMode = false; // 씬 둔 테스트용이면 체크
+  [SerializeField] private bool debugTestMode = false; // 씬에 둔 테스트용이면 체크
 
   void Start()
   {
@@ -64,8 +65,15 @@ public class MissileProj : MonoBehaviour
         float dist = Vector3.Distance(transform.position, hit.transform.position);
         if (dist < detectRadius && dist < minDist)
         {
-          target = hit.transform;
-          minDist = dist;
+          Vector3 toTarget = (hit.transform.position - transform.position).normalized;
+          float dot = Vector3.Dot(transform.forward, toTarget);
+
+          // 전방 85도 이내만 탐지
+          if (dot > Mathf.Cos(85f * Mathf.Deg2Rad))
+          {
+            target = hit.transform;
+            minDist = dist;
+          }
         }
       }
     }
