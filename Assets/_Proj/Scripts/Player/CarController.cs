@@ -543,7 +543,7 @@ public class CarController : MonoBehaviour
         {
           boostApplyer.ApplyBoost(2f, 1.1f, 1.5f); // 시간, 크기, 속도
         };
-        lv.z = Mathf.Max(lv.z, 28f); // 부스터 목표 속도 (m/s)
+        lv.z = Mathf.Max(lv.z, 35f); // 부스터 목표 속도 (m/s)
         rb.velocity = transform.TransformDirection(lv);
       }
 
@@ -560,7 +560,7 @@ public class CarController : MonoBehaviour
         if(boostApplyer != null)
         {
           boostApplyer.ApplyBoost(2f, 1.1f, 2f);
-          lv.z = (Mathf.Max(lv.z, 19f));
+          lv.z = (Mathf.Max(lv.z, 20f));
           rb.velocity = (transform.TransformDirection(lv));
         }
       }
@@ -574,7 +574,7 @@ public class CarController : MonoBehaviour
     Vector3 lv = transform.InverseTransformDirection(rb.velocity);
     if (boostApplyer != null)
       boostApplyer.ApplyBoost(3, 1.1f, 2f);
-    lv.z = Mathf.Max(lv.z, 32f); // 배럴롤에는 좀 더 강하게
+    lv.z = Mathf.Max(lv.z, 37f); // 배럴롤에는 좀 더 강하게
     rb.velocity = transform.TransformDirection(lv);
 
     yield return new WaitForSeconds(0.4f);
