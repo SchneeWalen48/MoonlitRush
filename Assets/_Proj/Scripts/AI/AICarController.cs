@@ -67,6 +67,7 @@ public class AICarController : MonoBehaviour
     bool isSpeedUp = false;
     public float speedUpDuration = 2f;
     public float downforce = 25f;
+    Coroutine speedUpCoroutine;
 
     [Header("Drift")] //player 스크립트에서 가져옴
     [SerializeField] private float driftDragMultiplier = 2f;
@@ -105,18 +106,18 @@ public class AICarController : MonoBehaviour
         Debug.DrawRay(origin, Vector3.down * downDis, Color.blue);
         bool isDown = Physics.Raycast(origin, Vector3.down, out RaycastHit downHit, downDis);
 
-        if (isDown)
-        {   //슬로프 감지
+        //if (isDown)
+        //{   //슬로프 감지
 
-            if (downHit.collider.CompareTag("SpeedUp"))
-            {
-                Debug.Log($"슬로프 감지. downforce: {downforce}");
-                carRB.AddForce(-transform.up * downforce, ForceMode.Acceleration);
+        //    if (downHit.collider.CompareTag("SpeedUp"))
+        //    {
+        //        Debug.Log($"슬로프 감지. downforce: {downforce}");
+        //        carRB.AddForce(-transform.up * downforce, ForceMode.Acceleration);
 
-                StartCoroutine(SpeedUpRoutine());
+        //        StartCoroutine(SpeedUpRoutine());
 
 
-            }
+        //    }
             //    //배럴롤 점프대 감지
             //    else if (downHit.collider.CompareTag("Barrel"))
             //    {
@@ -127,7 +128,7 @@ public class AICarController : MonoBehaviour
             //        }
             //    }
 
-        }
+        //}
         //else { lastSpeedUp = null; }
 
 
@@ -448,6 +449,8 @@ public class AICarController : MonoBehaviour
     public void OnTriggerEnter(Collider other)
     {
         if (isBoosted) return;
+        if (isSpeedUp) return;
+
         if (other.CompareTag("Boost"))
         {
             isBoosted = true;
@@ -459,12 +462,15 @@ public class AICarController : MonoBehaviour
 
             boostCoroutine = StartCoroutine(BoostRoutine(20, 3f));
         }
-        else if (other.CompareTag("Barrel"))
+        else if (other.CompareTag("SpeedUp"))
         {
-            if (isBarrelRolling == false)
+            isSpeedUp = true;
+            if (speedUpCoroutine != null)
             {
-                StartCoroutine(BarrelRollRoutine());
+                StopCoroutine (speedUpCoroutine);
             }
+
+            speedUpCoroutine = StartCoroutine(SpeedUpRoutine(20, 3f));
         }
         else if (other.CompareTag("Goal"))
         {
@@ -509,17 +515,17 @@ public class AICarController : MonoBehaviour
 
     }
 
-    IEnumerator SpeedUpRoutine()
+    IEnumerator SpeedUpRoutine(float force, float duration)
     {
-        isSpeedUp = true;
+        
         Debug.Log("AI 슬로프 시작");
-        maxSpeed += 50;
+        maxSpeed += force;
 
-        yield return new WaitForSeconds(speedUpDuration);
+        yield return new WaitForSeconds(duration);
 
-        isSpeedUp = false;
         Debug.Log("AI 슬로프 종료");
-        maxSpeed -= 50;
+        maxSpeed -= force;
+        isSpeedUp = false;
 
     }
 
