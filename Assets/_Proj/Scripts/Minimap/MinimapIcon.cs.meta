@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/_Proj/Scripts/UI/RankingPrefab.cs.meta
+guid: 2c1bb998157c2df4db935dd0562ae330
+========
+guid: 8576e06e75a4bfa43b9e04c26aff9d8d
+>>>>>>>> e934671 (Minimap + Dashboard):Assets/_Proj/Scripts/Minimap/MinimapIcon.cs.meta
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
