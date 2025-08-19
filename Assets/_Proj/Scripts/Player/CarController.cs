@@ -532,7 +532,7 @@ public class CarController : MonoBehaviour
         {
           boostApplyer.ApplyBoost(2f, 1.1f, 1.5f); // 시간, 크기, 속도
         };
-        lv.z = Mathf.Max(lv.z, 27f); // 부스터 목표 속도 (m/s)
+        lv.z = Mathf.Max(lv.z, 25f); // 부스터 목표 속도 (m/s)
         rb.velocity = transform.TransformDirection(lv);
       }
 
