@@ -80,7 +80,7 @@ public class AICarController : MonoBehaviour
     public bool isInvincible = false;
 
     [Header("Recovery Settings")]
-    [SerializeField] private float stuckTimeThreshold = 3f; // 멈췄다고 판단하는 시간 (초)
+    [SerializeField] private float stuckTimeThreshold = 1.5f; // 멈췄다고 판단하는 시간 (초)
     [SerializeField] private float recoveryTime = 1f;      // 복구 후 다시 움직이는 딜레이
     [SerializeField] private float rotationResetSpeed = 1f; // 회전 복구 속도
 
@@ -451,7 +451,7 @@ public class AICarController : MonoBehaviour
         if (isBoosted) return;
         if (isSpeedUp) return;
 
-        if (other.CompareTag("Boost"))
+        if (other.CompareTag("BoostPad"))
         {
             isBoosted = true;
 
@@ -467,10 +467,11 @@ public class AICarController : MonoBehaviour
             isSpeedUp = true;
             if (speedUpCoroutine != null)
             {
+                carRB.AddForce(-transform.up * downforce, ForceMode.Acceleration);
                 StopCoroutine (speedUpCoroutine);
             }
 
-            speedUpCoroutine = StartCoroutine(SpeedUpRoutine(20, 3f));
+            speedUpCoroutine = StartCoroutine(SpeedUpRoutine(100, 3f));
         }
         else if (other.CompareTag("Goal"))
         {
@@ -498,22 +499,22 @@ public class AICarController : MonoBehaviour
     }
 
     //배럴롤 코루틴
-    IEnumerator BarrelRollRoutine()
-    {
-        isBarrelRolling = true;
-        Debug.Log("AI 배럴롤 시작");
-        //carRB.useGravity = false;        
-        // carRB.AddRelativeTorque(Vector3.forward * barrelRollTorque, ForceMode.Acceleration);
+    //IEnumerator BarrelRollRoutine()
+    //{
+    //    isBarrelRolling = true;
+    //    Debug.Log("AI 배럴롤 시작");
+    //    //carRB.useGravity = false;        
+    //    // carRB.AddRelativeTorque(Vector3.forward * barrelRollTorque, ForceMode.Acceleration);
 
-        yield return new WaitForSeconds(barrelRollDuration); //회전 시간 
+    //    yield return new WaitForSeconds(barrelRollDuration); //회전 시간 
 
-        isBarrelRolling = false;
-        Debug.Log("AI 배럴롤 종료");
-        //carRB.useGravity = true;
+    //    isBarrelRolling = false;
+    //    Debug.Log("AI 배럴롤 종료");
+    //    //carRB.useGravity = true;
 
-        moveInput = 1f;
+    //    moveInput = 1f;
 
-    }
+    //}
 
     IEnumerator SpeedUpRoutine(float force, float duration)
     {
@@ -543,6 +544,41 @@ public class AICarController : MonoBehaviour
         carRB.drag = originDrag;
     }
 
+    private void OnCollisionEnter(Collision other)
+    {
+        //플레이어와 충돌 순간 반응
+        if (other.collider.CompareTag("Player"))
+        {
+            StabilizeAfterHit();
+        }
+    }
+
+    void StabilizeAfterHit()
+    {
+        carRB.angularVelocity *= 0.3f; //회전속도: 차량 흔들림 조절
+
+        Vector3 localVel = transform.InverseTransformDirection(carRB.velocity); //속도를 차량 로컬 좌표계로 바꿈
+        localVel.x *= 0.5f; //차량 튕기는 방향 조절
+        carRB.velocity = transform.TransformDirection(localVel); //로컬 좌표계를 월드 좌표계 속도로 바꿈
+
+        StartCoroutine(TemporaryStabilize());
+    }
+
+    //일시적 안정화 코루틴
+    IEnumerator TemporaryStabilize()
+    {
+        float originalDrag = carRB.drag;
+        float originalAngularDrag = carRB.angularDrag;
+
+        carRB.drag = 4f;
+        carRB.angularDrag = 4f;
+
+        yield return new WaitForSeconds(1f);
+
+        carRB.drag = originalDrag;
+        carRB.angularDrag = originalAngularDrag;
+    }
+
     void CheckForStuck()
     {
         // 차량이 움직이는지 확인
@@ -559,7 +595,7 @@ public class AICarController : MonoBehaviour
         // 일정 시간 이상 멈춰 있었다면 복구 루틴을 시작
         if (stuckTimer >= stuckTimeThreshold && !isRecovering)
         {
-            StartCoroutine(RecoverRoutine());
+            StartCoroutine(RespawnToNearestWaypoint());
         }
     }
 
@@ -569,47 +605,43 @@ public class AICarController : MonoBehaviour
         // 차의 '위' 방향(transform.up)이 월드 '위' 방향(Vector3.up)과 반대이면 뒤집힌 것으로 간주
         if (Vector3.Dot(transform.up, Vector3.up) < 0.5f && !isRecovering)
         {
-            StartCoroutine(RecoverRoutine());
+            StartCoroutine(RespawnToNearestWaypoint());
         }
     }
 
-    // 복구 루틴 코루틴
-    IEnumerator RecoverRoutine()
+    // 복구 루틴 코루틴: 웨이포인트 기준 리스폰
+    IEnumerator RespawnToNearestWaypoint()
     {
         isRecovering = true;
-        Debug.Log("AI 차량 복구 시작!");
 
-        // 차량의 움직임을 멈춥니다.
-        carRB.velocity = Vector3.zero;
-        carRB.angularVelocity = Vector3.zero;
-
-        // 차량의 회전을 웨이포인트 방향으로 서서히 돌려줌
-        while (Vector3.Dot(transform.forward, WaypointTest.GetWaypoint(currentWaypointIndex).forward) < 0.99f)
+        Transform nearest = null;
+        float minDist = Mathf.Infinity;
+        for (int i = 0; i < WaypointTest.Count; i++) //가까운 웨이포인트 탐색
         {
-            // 다음 웨이포인트를 향하도록 회전
-            Quaternion targetRotation = Quaternion.LookRotation(WaypointTest.GetWaypoint(currentWaypointIndex).position - transform.position);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationResetSpeed * Time.deltaTime);
-            yield return null;
+            float dist = Vector3.Distance(transform.position, WaypointTest.GetWaypoint(i).position);
+            if (dist < minDist)
+            {
+                minDist = dist;
+                nearest = WaypointTest.GetWaypoint(i);
+                currentWaypointIndex = i;
+            }
         }
 
-        // 차량을 웨이포인트 위치 근처로 이동
-        Vector3 recoveryPosition = WaypointTest.GetWaypoint(currentWaypointIndex).position;
-        recoveryPosition.y += 1f; // Y축은 살짝 위로 올려서 지면에 제대로 안착시키기 위함
-        transform.position = recoveryPosition;
-                
-        yield return new WaitForSeconds(recoveryTime);
+        if (nearest != null)
+        {
+            transform.position = nearest.position + Vector3.up * 1f; //리스폰 지점
+            transform.rotation = Quaternion.LookRotation(nearest.forward);
+            carRB.velocity = Vector3.zero;
+            carRB.angularVelocity = Vector3.zero;
+        }
 
+        yield return new WaitForSeconds(recoveryTime);
         isRecovering = false;
-        Debug.Log("AI 차량 복구 완료!");
     }
-    private void OnCollisionEnter(Collision other)
-    {
-        //플레이어와 충돌 순간 반응
-        //if (other.collider.CompareTag("Player"))
-        //{
-        //오디오 등
-        //}
-    }
+
+   
+   
+
 
 
 }

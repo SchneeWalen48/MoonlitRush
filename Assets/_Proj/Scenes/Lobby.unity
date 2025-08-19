@@ -437,6 +437,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   exit: {fileID: 1623672025}
+  carSelectionUI: {fileID: 1391429282}
 --- !u!114 &117209828
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -668,7 +669,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
+  m_TargetGraphic: {fileID: 278509618}
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
@@ -2128,7 +2129,11 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1635034344049306, guid: c0093395f1e71bc4c934799299a7a48b,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1164725134}
   m_SourcePrefab: {fileID: 100100000, guid: c0093395f1e71bc4c934799299a7a48b, type: 3}
 --- !u!4 &1164725130 stripped
 Transform:
@@ -2136,6 +2141,84 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1164725129}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1164725134
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1085685311}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68ced75f9ec83524c9608a09d40afb52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currSpeed: 0
+  rb: {fileID: 0}
+  rayPoints: []
+  drivable:
+    serializedVersion: 2
+    m_Bits: 0
+  accelPoint: {fileID: 0}
+  tires:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  frontTireParents:
+  - {fileID: 0}
+  - {fileID: 0}
+  skidMarks:
+  - {fileID: 0}
+  - {fileID: 0}
+  skidFxs:
+  - {fileID: 0}
+  - {fileID: 0}
+  engineSound: {fileID: 0}
+  skidSound: {fileID: 0}
+  boostApplyer: {fileID: 0}
+  springStiffness: 30000
+  damperStiffness: 3000
+  restLen: 1
+  springTravel: 0.5
+  wheelRadius: 0.33
+  reverseMaxSpeed: 5
+  reverseAccel: 1
+  acceleration: 25
+  maxSpeed: 100
+  deceleration: 10
+  steerForce: 15
+  turningCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  dragCoefficient: 0
+  maxGears: 5
+  gearsPercents:
+  - 0.18
+  - 0.36
+  - 0.56
+  - 0.78
+  - 1
+  holdTopSpeed: 1
+  dropBeforeShiftPercent: 0.1
+  driftDragMultiplier: 2
+  driftTransitionSpeed: 5
+  airGravity: 0.4
+  airGravityDuration: 1
+  lvTorqueStrength: 8
+  lvTorqueDamping: 0.6
+  maxLvTorque: 200
+  baseDownforce: 300
+  downforcePerMS: 0.6
+  maxDownforce: 1000
+  tireRotSpeed: 3000
+  maxSteeringAngle: 30
+  minSideSkidVel: 10
+  minPitch: 1
+  maxPitch: 5
 --- !u!1 &1391429279
 GameObject:
   m_ObjectHideFlags: 0
@@ -2495,9 +2578,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 117209828}
-        m_TargetAssemblyTypeName: StageSelectManager, Assembly-CSharp
-        m_MethodName: StartGame
+      - m_Target: {fileID: 117209827}
+        m_TargetAssemblyTypeName: ExitStartButtonUI, Assembly-CSharp
+        m_MethodName: GameStart
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

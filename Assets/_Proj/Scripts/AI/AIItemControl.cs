@@ -96,7 +96,7 @@ public class AIItemControl : MonoBehaviour
     {
         Vector3 forward = aiTransform.forward;
         Vector3 projected = Vector3.ProjectOnPlane(forward, Vector3.up);
-        return Vector3.Angle(projected, Vector3.forward) < 30f;
+        return Vector3.Angle(projected, Vector3.forward) < 15f;
     }
 
     //전방에 상대가 있는지 탐색
