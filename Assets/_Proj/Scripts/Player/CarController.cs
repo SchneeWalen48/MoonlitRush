@@ -77,7 +77,7 @@ public class CarController : MonoBehaviour
   #region Airbourne
   [Header("Airbourne Settings")]
   [SerializeField, Range(0, 1)] private float airGravity = 0.4f;
-  [SerializeField] private float airGravityDuration = 1f;
+  [SerializeField] private float airGravityDuration = 0.3f; // 결국 이것이 airTimer
   [SerializeField] private float lvTorqueStrength = 8f;
   [SerializeField] private float lvTorqueDamping = 0.6f;
   [SerializeField] private float maxLvTorque = 200f;
@@ -155,18 +155,12 @@ public class CarController : MonoBehaviour
       }
       else if (moveInput < -0.01f)
       {
-        if (currCarLocalVel.z > 0.1f)
-        {
-          Deceleration();
-        }
-        else
-        {
-          Acceleration();
-          readyToReverse = true;
-        }
+        if (currCarLocalVel.z > 0.1f) { Deceleration(); }
+        else { Acceleration(); readyToReverse = true; }
       }
       else
       {
+        if(!isHoldingTop)
         Deceleration();
       }
 
@@ -227,7 +221,7 @@ public class CarController : MonoBehaviour
     float targetDrag = isDrifting ? dragCoefficient / driftDragMultiplier : dragCoefficient;
     currDragCoefficient = Mathf.Lerp(currDragCoefficient, targetDrag, Time.deltaTime * driftTransitionSpeed);
 
-    float dragMagnitude = -currSidewaysSpeed * dragCoefficient;
+    float dragMagnitude = -currSidewaysSpeed * currDragCoefficient;
     Vector3 dragForce = transform.right * dragMagnitude;
     rb.AddForceAtPosition(dragForce, rb.worldCenterOfMass, ForceMode.Acceleration);
   }
@@ -243,21 +237,27 @@ public class CarController : MonoBehaviour
   #region Airbourne
   void Airbourne()
   {
-    if (!isGrounded)
+    if (airTimer > 0f)
     {
-        Vector3 up = transform.up;
-        Vector3 toUpAxis = Vector3.Cross(up, Vector3.up);
-        float sinAngle = toUpAxis.magnitude;
-        if (sinAngle > 1e-4f)
-        {
-          Vector3 torqueDir = toUpAxis.normalized;
-          float angle = Mathf.Asin(Mathf.Clamp(sinAngle, -1f, 1f));
-          Vector3 corrective = torqueDir * (8f * angle) - rb.angularVelocity * 0.6f;
-          corrective = Vector3.ClampMagnitude(corrective, 200f);
-          rb.AddTorque(corrective, ForceMode.Acceleration);
-        }
-      }
-    
+      Vector3 deltaF = rb.mass * (airGravity - 1f) * Physics.gravity;
+      rb.AddForce(deltaF, ForceMode.Force);
+      airTimer -= Time.fixedDeltaTime;
+    }
+
+    Vector3 up = transform.up;
+    Vector3 toUpAxis = Vector3.Cross(up, Vector3.up);
+    float sinAngle = toUpAxis.magnitude;
+    if (sinAngle > 1e-4f)
+    {
+      Vector3 torqueDir = toUpAxis.normalized;
+      float angle = Mathf.Asin(Mathf.Clamp(sinAngle, -1f, 1f));
+
+      Vector3 corrective = torqueDir * (lvTorqueStrength * angle) - rb.angularVelocity * lvTorqueDamping;
+
+      corrective = Vector3.ClampMagnitude(corrective, maxLvTorque);
+
+      rb.AddTorque(corrective, ForceMode.Acceleration);
+    }
   }
   #endregion
  
@@ -458,11 +458,6 @@ public class CarController : MonoBehaviour
       lv.z = gearTopSpeed;
       rb.velocity = transform.TransformDirection(lv);
     }
-
-    if (isHoldingTop && moveInput > 0f)
-    {
-      moveInput = 0f;
-    }
   }
   #endregion
 
@@ -537,7 +532,7 @@ public class CarController : MonoBehaviour
         {
           boostApplyer.ApplyBoost(2f, 1.1f, 1.5f); // 시간, 크기, 속도
         };
-        lv.z = Mathf.Max(lv.z, 28f); // 부스터 목표 속도 (m/s)
+        lv.z = Mathf.Max(lv.z, 27f); // 부스터 목표 속도 (m/s)
         rb.velocity = transform.TransformDirection(lv);
       }
 
@@ -554,7 +549,7 @@ public class CarController : MonoBehaviour
         if(boostApplyer != null)
         {
           boostApplyer.ApplyBoost(2f, 1.1f, 2f);
-          lv.z = (Mathf.Max(lv.z, 25f));
+          lv.z = (Mathf.Max(lv.z, 20f));
           rb.velocity = (transform.TransformDirection(lv));
         }
       }
@@ -562,12 +557,13 @@ public class CarController : MonoBehaviour
   }
   #endregion
 
+  #region Barrel Roll Coroutine
   IEnumerator BarrelRollCoroutine()
   {
     Vector3 lv = transform.InverseTransformDirection(rb.velocity);
     if (boostApplyer != null)
       boostApplyer.ApplyBoost(3, 1.1f, 2f);
-    lv.z = Mathf.Max(lv.z, 32f); // 배럴롤에는 좀 더 강하게
+    lv.z = Mathf.Max(lv.z, 30f);
     rb.velocity = transform.TransformDirection(lv);
 
     yield return new WaitForSeconds(0.4f);
@@ -589,4 +585,5 @@ public class CarController : MonoBehaviour
 
     moveInput = 1f;
   }
+  #endregion
 }
