@@ -11,6 +11,7 @@ TagManager:
   - BoostPad
   - ItemShield
   - AIPlayer
+  - CheckPoint
   layers:
   - Default
   - TransparentFX
@@ -20,7 +21,7 @@ TagManager:
   - UI
   - Track
   - Items
-  - 
+  - MinimapIcon
   - 
   - 
   - 
