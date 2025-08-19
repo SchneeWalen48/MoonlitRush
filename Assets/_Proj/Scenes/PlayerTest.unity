@@ -4298,11 +4298,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: PCar2
       objectReference: {fileID: 0}
-    - target: {fileID: 102362840992382580, guid: b91faa1253657164f8f062e3b5d7a07b,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 1527111455873764876, guid: b91faa1253657164f8f062e3b5d7a07b,
         type: 3}
       propertyPath: boostTrail
