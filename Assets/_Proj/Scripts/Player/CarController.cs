@@ -16,7 +16,6 @@ public class CarController : MonoBehaviour
   [SerializeField] private GameObject[] frontTireParents = new GameObject[2];
   [SerializeField] private TrailRenderer[] skidMarks = new TrailRenderer[2];
   [SerializeField] private ParticleSystem[] skidFxs = new ParticleSystem[2];
-  [SerializeField] private AudioSource engineSound, skidSound;
   public BoostApplyer boostApplyer;
   #endregion
 
@@ -51,7 +50,7 @@ public class CarController : MonoBehaviour
   [SerializeField] private float[] gearsPercents = new float[] { 0.18f, 0.36f, 0.56f, 0.78f, 1 };
   //[SerializeField] private float[] gearAccelMultipliers = new float[] { 1.8f, 1.5f, 1.25f, 1f, 0.8f };
   [SerializeField] private float holdTopSpeed = 1f; // 자동 변속 전 기어 별 최고 속도에서 유지하는 시간(s)
-  [SerializeField, Range(0.01f, 0.2f)] private float dropBeforeShiftPercent = 0.1f; // 변속 전 기어 별 최고 속도에서 잠깐 속도 줄이는 비율(%)[실제 기어 변속 하듯이 <- 수동 변속기 클러치 떼는 순간 속도 살짝 줄어드는 느낌]
+  [SerializeField, Range(0.01f, 0.2f)] private float dropBeforeShiftAmount = 5f; // 변속 전 기어 별 최고 속도에서 잠깐 속도 줄이는 속도(m/s)[실제 기어 변속 하듯이 <- 수동 변속기 클러치 떼는 순간 속도 살짝 줄어드는 느낌]
 
   private int currGear = 1; // 현재 기어 단
   private bool isHoldingTop = false; // 기어 최고 속도에서 속도 유지했는지
@@ -87,8 +86,9 @@ public class CarController : MonoBehaviour
   #endregion
 
   #region Barrel Roll
-  
-
+  bool isBarrelRolling = false;
+  public float barrelRollTorque = 100f;
+  public float barrelRollDuration = 1.5f;
   #endregion
 
   [Header("Weight Feel (Minimal)")]
@@ -101,15 +101,30 @@ public class CarController : MonoBehaviour
   [SerializeField] private float maxSteeringAngle = 30f;
   [SerializeField] private float minSideSkidVel = 10f;
 
+  #region Audio Settings
   [Header("Audio")]
+  [SerializeField] private AudioSource engineSound;
   [SerializeField]
   [Range(0, 1)] private float minPitch = 1f;
   [SerializeField]
   [Range(1, 5)] private float maxPitch = 5f;
+  // ================== GEAR ==================
+  [SerializeField] private AudioClip gearShiftSound;
+  [SerializeField, Range(0, 1)] private float shiftSoundVol = 0.7f;
+  [SerializeField] private bool usePitchDip = true;
+  [SerializeField, Range(0.3f, 1)] private float shiftPitchDiip = 0.75f; // 속도 내려갈때 피치 비율
+  [SerializeField] private float shiftPitchDipTime = 0.06f;
+  [SerializeField] private float shiftPitchRiseTime = 0.12f;
+  private bool shiftingPitch = false;
+  // ================== Skid ==================
+  [SerializeField] private AudioSource skidSound;
+  [SerializeField] float skidStartSlip = 2.0f; // 이 이상이면 소리 시작(m/s)
+  [SerializeField] float skidFullSlip = 7f; // 이 이상이면 최대 볼륨
+  [SerializeField] float skidFadeSpeed = 10f; // 볼륨/피치 램프 속도
+  [SerializeField] float skidMinVol = 0f, skidMaxVol = 0.9f;
+  [SerializeField] float skidMinPitch = 0.9f, skidMaxPitch = 1.2f;
+  #endregion
 
-  bool isBarrelRolling = false;
-  public float barrelRollTorque = 100f;
-  public float barrelRollDuration = 1.5f;
   void Awake()
   {
     rb = GetComponent<Rigidbody>();
@@ -119,6 +134,7 @@ public class CarController : MonoBehaviour
   {
     GetPlayerInput();
     currSpeed = rb.velocity.magnitude;
+    EngineSound();
   }
 
   void FixedUpdate()
@@ -140,8 +156,11 @@ public class CarController : MonoBehaviour
     GearLogic();
     ApplyReverseSpeed();
     Airbourne();
-    //EngineSound();
+    float slip = CalcLateralSpeed();
+    bool shouldSkid = isGrounded && (slip > skidStartSlip) && Mathf.Abs(currCarLocalVel.z) > 2f;
+    UpdatedSkidSound(shouldSkid, slip);
   }
+
 
   #region Movement
   void Movement()
@@ -329,14 +348,54 @@ public class CarController : MonoBehaviour
   #endregion
 
   #region Audio
-  //void EngineSound()
-  //{
-  //  engineSound.pitch = Mathf.Lerp(minPitch, maxPitch, Mathf.Abs(carVelRatio));
-  //}
-  //void ToggleSkidSound(bool toggle)
-  //{
-  //  skidSound.mute = !toggle;
-  //}
+  void EngineSound()
+  {
+    if (engineSound == null || shiftingPitch) return;
+    float t = Mathf.InverseLerp(0f, maxSpeed, Mathf.Abs(currCarLocalVel.z));
+    engineSound.pitch = Mathf.Lerp(minPitch, maxPitch, t);
+  }
+  IEnumerator ShiftAudioBlip(){
+    if (engineSound == null) yield break;
+    shiftingPitch = true;
+    float start = engineSound.pitch;
+    float target = MathF.Max(0.1f, start * shiftPitchDiip);
+
+    float t = 0f;
+    while(t < shiftPitchDipTime)
+    {
+      t += Time.deltaTime;
+      engineSound.pitch = Mathf.Lerp(start, target, t / shiftPitchDipTime);
+      yield return null;
+    }
+
+    t = 0f;
+    while(t < shiftPitchRiseTime)
+    {
+      t += Time.deltaTime;
+      engineSound.pitch = Mathf.Lerp(target, start, t / shiftPitchRiseTime);
+      yield return null;
+    }
+    shiftingPitch = false;
+  }
+
+  float CalcLateralSpeed()
+  {
+    Vector3 vPlanar = Vector3.ProjectOnPlane(rb.velocity, transform.up);
+    Vector3 vFwd = Vector3.Project(vPlanar, transform.forward);
+    Vector3 vSide = vPlanar - vFwd;
+    return vSide.magnitude; // m/s
+  }
+  void UpdatedSkidSound(bool on, float slip)
+  {
+    if (skidSound == null) return;
+
+    float t = on ? Mathf.InverseLerp(skidStartSlip, skidFullSlip, slip) : 0f;
+    float targetVol = Mathf.Lerp(skidMinVol, skidMaxVol, t);
+    float targetPitch = Mathf.Lerp(skidMinPitch, skidMaxPitch, t);
+
+    if (!skidSound.isPlaying && skidSound.volume > 0.01f) skidSound.Play();
+    if (skidSound.isPlaying && skidSound.volume < 0.01f) skidSound.Pause();
+  }
   #endregion
 
 
@@ -426,22 +485,28 @@ public class CarController : MonoBehaviour
       {
         if (!didDropBeforeShift)
         {
-          DropForwardSpeedByPercent(dropBeforeShiftPercent);
+          DropForwardSpeedByAmount(dropBeforeShiftAmount);
           didDropBeforeShift = true;
         }
         currGear = Mathf.Min(currGear + 1, max);
         isHoldingTop = false;
+
+        if(engineSound != null)
+        {
+          if (gearShiftSound != null) engineSound.PlayOneShot(gearShiftSound, shiftSoundVol);
+          if (usePitchDip) StartCoroutine(ShiftAudioBlip());
+        }
       }
     }
   }
 
-  void DropForwardSpeedByPercent(float percent)
+  void DropForwardSpeedByAmount(float amount)
   {
-    percent = Mathf.Clamp01(percent);
+    amount = Mathf.Max(0, amount);
     Vector3 lv = transform.InverseTransformDirection(rb.velocity);
     if (lv.z > 0f)
     {
-      lv.z *= (1f - percent);
+      lv.z = Mathf.Max(0f, lv.z - amount);
       rb.velocity = transform.TransformDirection(lv);
     }
   }
