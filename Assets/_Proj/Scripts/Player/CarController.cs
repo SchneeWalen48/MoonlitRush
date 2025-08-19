@@ -53,8 +53,8 @@ public class CarController : MonoBehaviour
   [SerializeField, Range(1, 5)] private int maxGears = 5;
   [SerializeField] private float[] gearsPercents = new float[] { 0.18f, 0.36f, 0.56f, 0.78f, 1 };
   //[SerializeField] private float[] gearAccelMultipliers = new float[] { 1.8f, 1.5f, 1.25f, 1f, 0.8f };
-  [SerializeField] private float holdTopSpeed = 1f; // 자동 변속 전 기어 별 최고 속도에서 유지하는 시간(s)
-  [SerializeField, Range(0.01f, 0.2f)] private float dropBeforeShiftAmount = 5f; // 변속 전 기어 별 최고 속도에서 잠깐 속도 줄이는 속도(m/s)[실제 기어 변속 하듯이 <- 수동 변속기 클러치 떼는 순간 속도 살짝 줄어드는 느낌]
+  [SerializeField] private float holdTopSpeed = 0.5f; // 자동 변속 전 기어 별 최고 속도에서 유지하는 시간(s)
+  [SerializeField, Min(0)] private float dropBeforeShiftAmount = 5f; // 변속 전 기어 별 최고 속도에서 잠깐 속도 줄이는 속도(m/s)[실제 기어 변속 하듯이 <- 수동 변속기 클러치 떼는 순간 속도 살짝 줄어드는 느낌]
 
   private int currGear = 1; // 현재 기어 단
   private bool isHoldingTop = false; // 기어 최고 속도에서 속도 유지했는지
