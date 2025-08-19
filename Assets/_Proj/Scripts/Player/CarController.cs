@@ -53,14 +53,14 @@ public class CarController : MonoBehaviour
   [SerializeField, Range(1, 5)] private int maxGears = 5;
   [SerializeField] private float[] gearsPercents = new float[] { 0.18f, 0.36f, 0.56f, 0.78f, 1 };
   //[SerializeField] private float[] gearAccelMultipliers = new float[] { 1.8f, 1.5f, 1.25f, 1f, 0.8f };
-  [SerializeField] private float holdTopSpeed = 0.5f; // 자동 변속 전 기어 별 최고 속도에서 유지하는 시간(s)
-  [SerializeField, Min(0)] private float dropBeforeShiftAmount = 5f; // 변속 전 기어 별 최고 속도에서 잠깐 속도 줄이는 속도(m/s)[실제 기어 변속 하듯이 <- 수동 변속기 클러치 떼는 순간 속도 살짝 줄어드는 느낌]
+  [SerializeField] private float holdTopSpeed = 1f; // 자동 변속 전 기어 별 최고 속도에서 유지하는 시간(s)
+  [SerializeField, Min(0)] private float dropBeforeShiftAmount = 1f; // 변속 전 기어 별 최고 속도에서 잠깐 속도 줄이는 속도(m/s)[실제 기어 변속 하듯이 <- 수동 변속기 클러치 떼는 순간 속도 살짝 줄어드는 느낌]
 
   private int currGear = 1; // 현재 기어 단
   private bool isHoldingTop = false; // 기어 최고 속도에서 속도 유지했는지
   private float holdTimer = 0f;
   private bool didDropBeforeShift = false; // 변속 전 속도 떨어뜨렸는지
-  [SerializeField] private float downshift = 0.9f; // 이전 기어 최고속도의 905 밑으로 떨어지면 다운시프트
+  [SerializeField] private float downshift = 0.3f; // 이전 기어 최고속도의 30% 밑으로 떨어지면 다운시프트
   [SerializeField] private float gearBypass = 0.7f; // 부스트 시 잠깐 기어로직 중단
   private float gearBypassEndTime = 0f;
   private bool gearBypassed => Time.time < gearBypassEndTime;
@@ -505,6 +505,7 @@ public class CarController : MonoBehaviour
         if(speedRatio < prevTop * downshift)
         {
           currGear--;
+          print($"기어 내림 { currGear}");
         }
       }
     }
@@ -519,6 +520,7 @@ public class CarController : MonoBehaviour
           didDropBeforeShift = true;
         }
         currGear = Mathf.Min(currGear + 1, max);
+        print($"기어 올림 {currGear}");
         isHoldingTop = false;
 
         if(engineSound != null)
@@ -645,7 +647,7 @@ public class CarController : MonoBehaviour
         };
         lv.z = Mathf.Max(lv.z, 25f); // 부스터 목표 속도 (m/s)
         rb.velocity = transform.TransformDirection(lv);
-        ApplyTransientOverdrive(add: 1.1f, minFwdIfLower: 20f);
+        ApplyTransientOverdrive(add: 1.15f, minFwdIfLower: 20f);
       }
 
       if (other.CompareTag("Barrel"))
