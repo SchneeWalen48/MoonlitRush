@@ -2,9 +2,9 @@
 using UnityEngine.SceneManagement;
 
 // Use it by attaching it to an empty game object.
-public class SceneLoader : MonoBehaviour
+public class SceneManager : MonoBehaviour
 {
-  public static SceneLoader Instance;
+  public static SceneManager Instance;
 
   void Awake()
   {
@@ -23,20 +23,20 @@ public class SceneLoader : MonoBehaviour
   public void LoadScene(string sceneName)
   {
     if(!string.IsNullOrEmpty(sceneName))
-      SceneManager.LoadScene(sceneName);
+      UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
   }
 
   // Load by scene index
   public void LoadScene(int sceneIdx)
   {
-    if(sceneIdx >= 0 && sceneIdx < SceneManager.sceneCountInBuildSettings)
-      SceneManager.LoadScene(sceneIdx);
+    if(sceneIdx >= 0 && sceneIdx < UnityEngine.SceneManagement.SceneManager.sceneCountInBuildSettings)
+      UnityEngine.SceneManagement.SceneManager.LoadScene(sceneIdx);
   }
 
   // Reload current scene
   public void ReloadScene()
   {
-    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
   }
 
   public void QuitGame()

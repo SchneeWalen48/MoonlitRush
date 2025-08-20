@@ -1154,18 +1154,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 244911441}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &523821144 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6127418364140323657, guid: 3d9253b0c54ffed4bb1286037c6ff052,
-    type: 3}
-  m_PrefabInstance: {fileID: 244911441}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c764a256e9de744397d99dab1cc7c32, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &536806939
 GameObject:
   m_ObjectHideFlags: 0
@@ -1643,8 +1631,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 752872745}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.15196395, y: 0.18514995, z: -0.028992664, w: 0.97045654}
-  m_LocalPosition: {x: -1.3990518, y: 1.22, z: -3.5330799}
+  m_LocalRotation: {x: 0.10939281, y: 0.69859374, z: -0.10939281, w: 0.69859374}
+  m_LocalPosition: {x: -46.8, y: 1.22, z: -99.1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2222,6 +2210,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currSpeed: 0
+  stats: {fileID: 0}
   rb: {fileID: 0}
   rayPoints:
   - {fileID: 1286817753}
@@ -2255,16 +2244,6 @@ MonoBehaviour:
   reverseMaxSpeed: 20
   reverseAccel: 1
   acceleration: 25
-  maxSpeed: 100
-  deceleration: 10
-  steerForce: 15
-  turningCurve:
-    serializedVersion: 2
-    m_Curve: []
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  dragCoefficient: 0
   extraDecayPerSec: 10
   maxGears: 5
   gearsPercents:
@@ -2273,21 +2252,16 @@ MonoBehaviour:
   - 0.56
   - 0.78
   - 1
-  holdTopSpeed: 5
   dropBeforeShiftAmount: 5
   downshift: 0.9
   gearBypass: 0.7
   driftDragMultiplier: 2
   driftTransitionSpeed: 5
-  airGravity: 0.4
-  airGravityDuration: 2
   lvTorqueStrength: 8
   lvTorqueDamping: 0.6
   maxLvTorque: 200
   barrelRollTorque: 250
   barrelRollDuration: 1.5
-  baseDownforce: 350
-  downforcePerMS: 0.7
   maxDownforce: 1200
   tireRotSpeed: 3000
   maxSteeringAngle: 3
@@ -2379,7 +2353,7 @@ MonoBehaviour:
   slotUis:
   - {fileID: 807679780}
   - {fileID: 1369156343}
-  useItem: {fileID: 523821144}
+  useItem: {fileID: 2063695768}
 --- !u!1 &1190665949
 GameObject:
   m_ObjectHideFlags: 3
@@ -3873,8 +3847,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1824203620}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.15196395, y: 0.18514995, z: -0.028992664, w: 0.97045654}
-  m_LocalPosition: {x: -1.3990518, y: 1.22, z: -3.5330799}
+  m_LocalRotation: {x: 0.109392814, y: 0.6985938, z: -0.109392814, w: 0.69859374}
+  m_LocalPosition: {x: -46.8, y: 1.22, z: -99.1}
   m_LocalScale: {x: 10, y: 10, z: 10}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4217,6 +4191,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 90, y: 90, z: 0}
+--- !u!114 &2063695768 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7965636369472307532, guid: b91faa1253657164f8f062e3b5d7a07b,
+    type: 3}
+  m_PrefabInstance: {fileID: 2153364018667983280}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c764a256e9de744397d99dab1cc7c32, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &2146155862
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4298,6 +4284,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: PCar2
       objectReference: {fileID: 0}
+    - target: {fileID: 953680389604440349, guid: b91faa1253657164f8f062e3b5d7a07b,
+        type: 3}
+      propertyPath: itemSlots
+      value: 
+      objectReference: {fileID: 1162922690}
     - target: {fileID: 1527111455873764876, guid: b91faa1253657164f8f062e3b5d7a07b,
         type: 3}
       propertyPath: boostTrail
@@ -4306,7 +4297,7 @@ PrefabInstance:
     - target: {fileID: 2929671505535668610, guid: b91faa1253657164f8f062e3b5d7a07b,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -43
       objectReference: {fileID: 0}
     - target: {fileID: 2929671505535668610, guid: b91faa1253657164f8f062e3b5d7a07b,
         type: 3}
@@ -4316,7 +4307,7 @@ PrefabInstance:
     - target: {fileID: 2929671505535668610, guid: b91faa1253657164f8f062e3b5d7a07b,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -99.1
       objectReference: {fileID: 0}
     - target: {fileID: 2929671505535668610, guid: b91faa1253657164f8f062e3b5d7a07b,
         type: 3}
@@ -4353,6 +4344,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7965636369472307532, guid: b91faa1253657164f8f062e3b5d7a07b,
+        type: 3}
+      propertyPath: slotUI
+      value: 
+      objectReference: {fileID: 807679780}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
