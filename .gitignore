@@ -101,3 +101,5 @@ InitTestScene*.unity*
 **공유 불가**
 /[Aa]ssets/_Proj/_NotShared/
 /[Aa]ssets/_Proj/_NotShared.meta
+Assets/_Proj/Prefabs/Car Test.prefab
+Assets/_Proj/Prefabs/Car Test.prefab.meta
