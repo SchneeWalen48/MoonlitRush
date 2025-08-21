@@ -198,7 +198,7 @@ public class AICarController : MonoBehaviour
 
         Debug.Log($"Current Angle: {angleToNext}, Current Speed: {currentSpeed}"); //콘솔에 찍힘 그렇담 드리프트 로직이 문제란 소리....
 
-        currentSpeed = carRB.velocity.magnitude; //rigidbody 속도(m/s)를 km/h로 변환               
+        currentSpeed = carRB.velocity.magnitude * 3.6f; //rigidbody 속도(m/s)를 km/h로 변환               
 
         if (angleToNext > 10f && currentSpeed > 50f && !isDrifting) //급커브 드리프트
         {
