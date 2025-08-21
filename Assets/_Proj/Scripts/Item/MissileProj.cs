@@ -1,7 +1,4 @@
-﻿using System.Reflection;
-using Unity.Android.Types;
-using Unity.VisualScripting;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class MissileProj : MonoBehaviour
 {
@@ -13,7 +10,14 @@ public class MissileProj : MonoBehaviour
   public float lifeTime;
   public float detectRadius = 30f;
   private GameObject explosionFx;
+
+  private Vector3 launchFwd = Vector3.zero;
+  [SerializeField] bool inheritShootervelocity = true;
+  [SerializeField] float inheritDecayPerSec = 0f;
+  Vector3 inheritedVel;
+
   [SerializeField] private bool debugTestMode = false; // 씬에 둔 테스트용이면 체크
+
 
   void Start()
   {
@@ -30,7 +34,7 @@ public class MissileProj : MonoBehaviour
       me = null; // 자기 자신 판정 없앰
     }
   }
-  public void Init(float power, float duration, GameObject shooter, GameObject fxPrefab)
+  public void Init(float power, float duration, GameObject shooter, GameObject fxPrefab, Transform fwdBasis = null)
   {
     rb = GetComponent<Rigidbody>();
     speed = power; // ItemData에서 덮어씀
@@ -38,14 +42,23 @@ public class MissileProj : MonoBehaviour
     lifeTime = duration;
     explosionFx = fxPrefab;
 
-    Collider myCol = GetComponent<Collider>();
-    Collider shooterCol = shooter.GetComponent<Collider>();
+    var myCols = GetComponentsInChildren<Collider>();
+    var shootCols = shooter.GetComponentsInChildren<Collider>();
+    foreach (var mc in myCols)
+      foreach (var sc in shootCols)
+        Physics.IgnoreCollision(mc, sc);
 
-    if(myCol != null && shooterCol != null)
-      Physics.IgnoreCollision(myCol, shooterCol);
-    
+    Transform basis = fwdBasis != null ? fwdBasis : shooter.transform;
+    launchFwd = basis.TransformDirection(Vector3.forward).normalized;
+
+    var shooterRb = shooter.GetComponentInParent<Rigidbody>();
+    inheritedVel = (inheritShootervelocity && shooterRb != null) ? shooterRb.velocity : Vector3.zero;
+
     if(rb!= null)
-      rb.velocity = transform.forward * speed;
+      rb.velocity = inheritedVel + launchFwd * speed;
+
+    var lookDir = (rb != null && rb.velocity.sqrMagnitude > 0.01f) ? rb.velocity : launchFwd;
+    transform.rotation = Quaternion.LookRotation(lookDir, Vector3.up);
 
     Destroy(gameObject, lifeTime);
   }
@@ -53,6 +66,8 @@ public class MissileProj : MonoBehaviour
   void FixedUpdate()
   {
     if (rb == null) return;
+
+    Vector3 fwd = (rb.velocity.sqrMagnitude > 0.01f) ? rb.velocity.normalized : (launchFwd != Vector3.zero ? launchFwd : transform.forward);
 
     // 가장 가까운 ai 탐색
     if (target == null)
@@ -63,42 +78,45 @@ public class MissileProj : MonoBehaviour
       foreach (var hit in aiPlayers)
       {
         float dist = Vector3.Distance(transform.position, hit.transform.position);
-        if (dist < detectRadius && dist < minDist)
-        {
-          Vector3 toTarget = (hit.transform.position - transform.position).normalized;
-          float dot = Vector3.Dot(transform.forward, toTarget);
+        if (dist > detectRadius) continue;
+        
+        Vector3 toTarget = (hit.transform.position - transform.position).normalized;
+        float dot = Vector3.Dot(fwd, toTarget);
 
-          // 전방 85도 이내만 탐지
-          if (dot > Mathf.Cos(85f * Mathf.Deg2Rad))
-          {
-            target = hit.transform;
-            minDist = dist;
-          }
+        // 전방 75도 이내만 탐지
+        if (dot > Mathf.Cos(75f * Mathf.Deg2Rad) && dist < minDist)
+        {
+          target = hit.transform;
+          minDist = dist;
         }
       }
     }
+    Vector3 baseVel = inheritedVel;
 
     // 타깃 발견 시 추적
     if (target != null)
     {
-      Vector3 targetPos = target.transform.position + Vector3.up * 2f;
+      Vector3 targetPos = target.position + Vector3.up * 2f;
       Vector3 dir = (targetPos - transform.position).normalized;
-      rb.velocity = dir * speed;
+      rb.velocity = baseVel + dir * speed;
+      transform.rotation = Quaternion.LookRotation(rb.velocity, Vector3.up);
     }
     // 타겟 없으면 직선
     else
     {
-      rb.velocity = transform.forward * speed;
-    }
+      rb.velocity = baseVel + launchFwd * speed;
 
-    if(rb.velocity.sqrMagnitude > 0.1f)
-    {
-      transform.rotation = Quaternion.LookRotation(rb.velocity.normalized, Vector3.up);
+      if (rb.velocity.sqrMagnitude > 0.1f)
+      {
+        transform.rotation = Quaternion.LookRotation(rb.velocity, Vector3.up);
+      }
     }
   }
 
   void OnCollisionEnter(Collision collision)
   {
+    if (me != null && (collision.transform == me.transform || collision.transform.IsChildOf(me.transform))) return;
+
     print("충돌 " + collision.gameObject.name);
 
     // 미사일 맞았을 때

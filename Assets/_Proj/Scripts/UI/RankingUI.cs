@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
+// Ending Ranking UI
 public class RankingUI : MonoBehaviour
 {
   public GameObject rankingPanel; // for RankingUI activate/deactivate

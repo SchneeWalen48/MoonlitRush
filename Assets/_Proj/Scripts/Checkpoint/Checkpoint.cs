@@ -1,16 +1,29 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+Ôªøusing UnityEngine;
 
-// Check Pointø° Ω∫≈©∏≥∆Æ ¿˚øÎ
+// Check PointÏóê Ïä§ÌÅ¨Î¶ΩÌä∏ Ï†ÅÏö©
 public class Checkpoint : MonoBehaviour
 {
-    public int checkpointId;
-    public bool isFinalCheckpoint = false;
-    public Checkpoint nextCheckpoint;
+  public int checkpointId;
+  public bool isFinalCheckpoint = false;
+  public Checkpoint nextCheckpoint;
 
-    public void SetNextCheckpoint(Checkpoint next)
-    {
-        nextCheckpoint = next;
-    }
+  void Reset()
+  {
+    var col = GetComponent<Collider>();
+    if (col) col.isTrigger = true;
+  }
+
+  void OnTriggerEnter(Collider other)
+  {
+    var lap = other.GetComponentInParent<LapCounter>() ?? other.GetComponent<LapCounter>();
+    if (lap == null) return;
+
+    if (lap.nextCheckpoint != this) return;
+
+    lap.PassCheckpoint(this);
+  }
+  public void SetNextCheckpoint(Checkpoint next)
+  {
+    nextCheckpoint = next;
+  }
 }

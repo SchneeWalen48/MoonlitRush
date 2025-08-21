@@ -7,11 +7,11 @@ public class PlayerRaceStatus : MonoBehaviour
   public float distToNextCP = float.MaxValue; // 다음 체크포인트까지 거리
   public Transform nextCPTrans; // 다음 체크포인트 위치
 
-  private ChekcPointManager cpManager;
+  private CheckpointManager cpManager;
 
   void Start()
   {
-    cpManager = FindObjectOfType<ChekcPointManager>();
+    cpManager = FindObjectOfType<CheckpointManager>();
   }
   void Update()
   {
@@ -23,14 +23,14 @@ public class PlayerRaceStatus : MonoBehaviour
 
   void OnTriggerEnter(Collider other)
   {
-    CheckPoint cp = other.GetComponent<CheckPoint>();
+    Checkpoint cp = other.GetComponent<Checkpoint>();
     if (cp != null)
     {
       UpdateCheckPoint(cp);  
     }
   }
 
-  void UpdateCheckPoint(CheckPoint cp)
+  void UpdateCheckPoint(Checkpoint cp)
   {
     if(cp.checkpointId != lastCheckpointId)
     {

@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ChekcpointManager : MonoBehaviour
+public class CheckpointManager : MonoBehaviour
 {
     public List<Checkpoint> allCheckPoints;
+
+    public Checkpoint firstpoint;
 
     void Start()
     {
