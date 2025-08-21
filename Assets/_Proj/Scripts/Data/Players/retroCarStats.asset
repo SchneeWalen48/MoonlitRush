@@ -52,7 +52,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   holdTopSpeed: 1
-  baseDownforce: 1000
+  baseDownforce: 2000
   downforcePerMS: 1
   airGravity: 0.6
   airGravityDuration: 0.6
@@ -90,3 +90,9 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   brakePow: 10
+  coastForceCoeff: 20
+  brakeForceCoeff: 24
+  frontBiasFwd: 0.78
+  rearBiasRev: 0.81
+  lowSpeed: 2.5
+  antiPitchCoeff: 70

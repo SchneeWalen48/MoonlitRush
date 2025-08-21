@@ -16,6 +16,10 @@ MonoBehaviour:
   acceleration: 2
   maxSpeed: 22
   deceleration: 3
+  decelLerpSpeed: 6
+  coastFactor: 0.6
+  minSpeedForFullDecel: 6
+  currDecelMag: 0
   steerForce: 25
   angularDrag: 15
   turningCurve:

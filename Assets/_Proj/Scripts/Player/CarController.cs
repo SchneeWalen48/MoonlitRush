@@ -29,7 +29,7 @@ public class CarController : MonoBehaviour
   [SerializeField] private float springTravel = 0.5f;
   [SerializeField] private float wheelRadius = 0.33f;
   #endregion
-  
+
   int[] wheelIsGrounded = new int[4];
   bool isGrounded = false;
   public bool isInvincible { get; set; }
@@ -47,6 +47,11 @@ public class CarController : MonoBehaviour
   private AnimationCurve turningCurve;
   private AnimationCurve accelCurve;
   private float dragCoefficient = 100f;
+  private float decelLerpSpeed = 7f;   // 클수록 빨리 따라감
+  [Range(0, 1)] private float coastFactor = 0.6f; // 페달 off일 때 제동 비율
+  private float minSpeedForFullDecel = 6f; // 저속에서는 감속 줄이기(m/s)
+  private float currDecelMag = 0f; // 현재 적용 중인 감속 크기(스무딩 값)
+
 
   // 부스트 효과
   [SerializeField] private float extraDecayPerSec = 10f; // 초당 얼마나 줄일지(m/s)
@@ -165,8 +170,8 @@ public class CarController : MonoBehaviour
       airTimer = airGravityDuration;
     }
     isAir = isGrounded;
- 
-    CalculateCarVelocity(); 
+
+    CalculateCarVelocity();
     ApplyDownforce();
     Movement();
     Visuals();
@@ -191,6 +196,10 @@ public class CarController : MonoBehaviour
     deceleration = s.deceleration;
     steerForce = s.steerForce;
     turningCurve = s.turningCurve;
+    decelLerpSpeed = s.decelLerpSpeed;
+    coastFactor = s.coastFactor;
+    minSpeedForFullDecel = s.minSpeedForFullDecel;
+    currDecelMag = s.currDecelMag;
 
     holdTopSpeed = s.holdTopSpeed;
 
@@ -223,8 +232,8 @@ public class CarController : MonoBehaviour
       }
       else
       {
-        if(!isHoldingTop)
-        Deceleration();
+        if (!isHoldingTop)
+          Deceleration();
       }
 
       Turn();
@@ -234,6 +243,7 @@ public class CarController : MonoBehaviour
 
   void Acceleration()
   {
+    currDecelMag = 0f;
     float accelPower = (moveInput >= 0f) ? acceleration : reverseAccel;
 
     float speedRatio = Mathf.Clamp01(MathF.Abs(currCarLocalVel.z) / maxSpeed);
@@ -241,7 +251,7 @@ public class CarController : MonoBehaviour
     Vector3 force = accelPower * Mathf.Abs(moveInput) * Mathf.Sign(moveInput) * curveMulti * transform.forward;
 
     // 후륜 구동 : 뒷바퀴 idx 2부터
-    for(int i = 2; i < tires.Length; i++)
+    for (int i = 2; i < tires.Length; i++)
     {
       rb.AddForceAtPosition(acceleration * moveInput * transform.forward, tires[i].transform.position, ForceMode.Acceleration);
     }
@@ -251,8 +261,33 @@ public class CarController : MonoBehaviour
   {
     Vector3 lv = transform.InverseTransformDirection(rb.velocity);
     float dir = Mathf.Sign(lv.z);
-    Vector3 brake = -dir * deceleration * brakePow * transform.forward;
-    rb.AddForceAtPosition(brake, accelPoint.position, ForceMode.Acceleration);
+    float speedAbs = Mathf.Abs(lv.z);
+
+    // 페달 off vs 브레이크 판단
+    bool isCoast = Mathf.Abs(moveInput) <= 0.01f;
+    bool isBrake = (!isCoast) && (
+      (moveInput < -0.01f && lv.z > 0.1f) ||   //전진 중 후진 입력
+      (moveInput > 0.01f && lv.z < -0.1f)      // 후진 중 전진 입력
+       );
+
+    // 기본 제동 크기
+    float baseDecel = deceleration * brakePow;
+
+    // 저속 구간에서는 과도한 감속 방지(속도 비례)
+    float lowSpeedScale = Mathf.InverseLerp(0f, minSpeedForFullDecel, speedAbs);
+
+    // 목표 감속 크기: 브레이크일 땐 100%, 코스트일 땐 coastFactor
+    float targetMag = baseDecel * Mathf.Lerp(coastFactor, 1f, isBrake ? 1f : 0f);
+
+    // 저속일수록 더 부드럽게 줄이기
+    targetMag *= Mathf.Clamp01(lowSpeedScale);
+
+    // 스무딩 (FixedUpdate 기준으로는 MoveTowards가 안정적)
+    currDecelMag = Mathf.MoveTowards(currDecelMag, targetMag, decelLerpSpeed * Time.fixedDeltaTime);
+
+    // 진행 반대 방향으로 Center of Mass에 힘 적용 -> Pitch/Yaw 부작용 최소
+    Vector3 brake = -dir * currDecelMag * transform.forward;
+    rb.AddForce(brake, ForceMode.Acceleration);
   }
 
   void ApplyReverseSpeed()
@@ -320,7 +355,7 @@ public class CarController : MonoBehaviour
     }
   }
   #endregion
- 
+
   #region Visuals
   void Visuals()
   {
@@ -354,7 +389,7 @@ public class CarController : MonoBehaviour
     ToggleSkidMarks(doSkid);
     ToggleSkidSmokes(doSkid);
 
-    if(boostApplyer != null && boostApplyer.fx != null)
+    if (boostApplyer != null && boostApplyer.fx != null)
     {
       boostApplyer.fx.SetEmission(allowFwdFx);
     }
@@ -395,14 +430,15 @@ public class CarController : MonoBehaviour
     float t = Mathf.InverseLerp(0f, maxSpeed, Mathf.Abs(currCarLocalVel.z));
     engineSound.pitch = Mathf.Lerp(minPitch, maxPitch, t);
   }
-  IEnumerator ShiftAudioBlip(){
+  IEnumerator ShiftAudioBlip()
+  {
     if (engineSound == null) yield break;
     shiftingPitch = true;
     float start = engineSound.pitch;
     float target = MathF.Max(0.1f, start * shiftPitchDiip);
 
     float t = 0f;
-    while(t < shiftPitchDipTime)
+    while (t < shiftPitchDipTime)
     {
       t += Time.deltaTime;
       engineSound.pitch = Mathf.Lerp(start, target, t / shiftPitchDipTime);
@@ -410,7 +446,7 @@ public class CarController : MonoBehaviour
     }
 
     t = 0f;
-    while(t < shiftPitchRiseTime)
+    while (t < shiftPitchRiseTime)
     {
       t += Time.deltaTime;
       engineSound.pitch = Mathf.Lerp(target, start, t / shiftPitchRiseTime);
@@ -521,14 +557,14 @@ public class CarController : MonoBehaviour
         holdTimer = holdTopSpeed;
         didDropBeforeShift = false;
       }
-      else if(currGear > 1)
+      else if (currGear > 1)
       {
         // 이전 기어 상한에서 downshift값만큼 떨어지면 내림
         float prevTop = gearsPercents[Mathf.Clamp(currGear - 2, 0, max - 1)];
-        if(speedRatio < prevTop * downshift)
+        if (speedRatio < prevTop * downshift)
         {
           currGear--;
-          print($"기어 내림 { currGear}");
+          print($"기어 내림 {currGear}");
         }
       }
     }
@@ -546,7 +582,7 @@ public class CarController : MonoBehaviour
         print($"기어 올림 {currGear}");
         isHoldingTop = false;
 
-        if(engineSound != null)
+        if (engineSound != null)
         {
           if (gearShiftSound != null) engineSound.PlayOneShot(gearShiftSound, shiftSoundVol);
           if (usePitchDip) StartCoroutine(ShiftAudioBlip());
@@ -596,7 +632,7 @@ public class CarController : MonoBehaviour
 
   void EndBooster()
   {
-    if(extraFwd > 0f)
+    if (extraFwd > 0f)
     {
       Vector3 lv = transform.InverseTransformDirection(rb.velocity);
       lv.z += extraFwd;
@@ -608,7 +644,7 @@ public class CarController : MonoBehaviour
     else
     {
       Vector3 lv = transform.InverseTransformDirection(rb.velocity);
-      if(lv.z > maxSpeed)
+      if (lv.z > maxSpeed)
       {
         lv.z = Mathf.Max(maxSpeed, lv.z - Time.fixedDeltaTime * deceleration);
         rb.velocity = transform.TransformDirection(lv);
@@ -680,7 +716,7 @@ public class CarController : MonoBehaviour
       return;
 
     EnterGearBypass(gearBypass, true);
-    
+
     if (currCarLocalVel.z > 0.1f)
     {
       if (other.CompareTag("SpeedUp"))
@@ -689,7 +725,8 @@ public class CarController : MonoBehaviour
         if (boostApplyer != null)
         {
           boostApplyer.ApplyBoost(2f, 1.1f, 1.5f); // 시간, 크기, 속도
-        };
+        }
+        ;
         rb.AddForce(transform.forward * acceleration * 30f, ForceMode.Acceleration); // 슬로프 탈 때 속도 감속 강제 보정
 
         float targetBoostSpeed = maxSpeed * 1.25f; // 내 차 최고속도의 125%
@@ -706,7 +743,7 @@ public class CarController : MonoBehaviour
       if (other.CompareTag("BoostPad"))
       {
         Debug.Log($"감지 : {other.tag}");
-        if(boostApplyer != null)
+        if (boostApplyer != null)
         {
           boostApplyer.ApplyBoost(2f, 1.1f, 2f);
 

@@ -8,6 +8,10 @@ public class CarStats : ScriptableObject
   public float acceleration = 3f;
   public float maxSpeed = 20f;
   public float deceleration = 3f;
+  public float decelLerpSpeed = 7f;   // 클수록 빨리 따라감
+  [Range(0, 1)] public float coastFactor = 0.6f; // 페달 off일 때 제동 비율
+  public float minSpeedForFullDecel = 6f; // 저속에서는 감속 줄이기(m/s)
+  public float currDecelMag = 0f; // 현재 적용 중인 감속 크기(스무딩 값)
 
   [Header("Handling")]
   public float steerForce = 20f;
