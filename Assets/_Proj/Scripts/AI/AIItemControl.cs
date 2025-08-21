@@ -77,7 +77,7 @@ public class AIItemControl : MonoBehaviour
         Collider[] hits = Physics.OverlapSphere(transform.position, 15f); // 반경 15 유닛 탐지
         foreach (var hit in hits)
         {
-            if (hit.CompareTag("Missile")) // 미사일 태그
+            if (hit.CompareTag("ItemMissile")) // 미사일 태그
             {
                 Vector3 dirToMissile = hit.transform.position - transform.position;
                 // 뒤쪽에서 오는 경우만 판단
@@ -96,7 +96,7 @@ public class AIItemControl : MonoBehaviour
     {
         Vector3 forward = aiTransform.forward;
         Vector3 projected = Vector3.ProjectOnPlane(forward, Vector3.up);
-        return Vector3.Angle(projected, Vector3.forward) < 30f;
+        return Vector3.Angle(projected, Vector3.forward) < 15f;
     }
 
     //전방에 상대가 있는지 탐색

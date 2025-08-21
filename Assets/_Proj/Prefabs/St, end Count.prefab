@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &3412449369605495809
+--- !u!1 &821442476909516100
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,11 +8,12 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 7029560584399148289}
-  - component: {fileID: 880921106014100422}
-  - component: {fileID: 1054452416681241834}
-  - component: {fileID: 2442649663318307964}
-  - component: {fileID: 5420769613012596111}
+  - component: {fileID: 8128047122927816506}
+  - component: {fileID: 9091875532477046740}
+  - component: {fileID: 3169106091384987945}
+  - component: {fileID: 582721705838584356}
+  - component: {fileID: 3135875948468071679}
+  - component: {fileID: 4142413221821198825}
   m_Layer: 0
   m_Name: St, end Count
   m_TagString: Goal
@@ -20,13 +21,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &7029560584399148289
+--- !u!4 &8128047122927816506
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3412449369605495809}
+  m_GameObject: {fileID: 821442476909516100}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -104.5, y: 0, z: 62.07}
@@ -35,53 +36,69 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &880921106014100422
+--- !u!114 &9091875532477046740
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3412449369605495809}
+  m_GameObject: {fileID: 821442476909516100}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b37c45d85e87c6e42badba7b0894a812, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   finalCountText: {fileID: 0}
+  defaultSeconds: 10
+  playerCar: {fileID: 0}
   AICar: {fileID: 0}
---- !u!114 &1054452416681241834
+--- !u!114 &3169106091384987945
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3412449369605495809}
+  m_GameObject: {fileID: 821442476909516100}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7a44bd868c7bf0c4886097789d67c174, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   startCountText: {fileID: 0}
+  playerCar: {fileID: 0}
   AICar: {fileID: 0}
---- !u!114 &2442649663318307964
+--- !u!114 &582721705838584356
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3412449369605495809}
+  m_GameObject: {fileID: 821442476909516100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87e9c652622663b41bbad55c819c23b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  countdownSeconds: 10
+--- !u!114 &3135875948468071679
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 821442476909516100}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 642f6858fc8eaca4a8e7d55b421f5988, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!65 &5420769613012596111
+--- !u!65 &4142413221821198825
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3412449369605495809}
+  m_GameObject: {fileID: 821442476909516100}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2

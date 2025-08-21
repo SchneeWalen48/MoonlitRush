@@ -5,20 +5,25 @@ TagManager:
   serializedVersion: 2
   tags:
   - SpeedUp
+  - Barrel
+  - ItemBooster
+  - ItemMissile
   - BoostPad
+  - ItemShield
+  - AIPlayer
   - CheckPoint
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Ground
   - Water
   - UI
-  - Ground
   - Track
+  - Items
   - MinimapIcon
-  - Car
-  - Checkpoint
+  - 
+  - 
   - 
   - 
   - 

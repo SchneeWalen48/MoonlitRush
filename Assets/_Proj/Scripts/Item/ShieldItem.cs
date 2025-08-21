@@ -5,45 +5,42 @@ using UnityEngine;
 
 public class ShieldItem : MonoBehaviour
 {
-    private bool isShield;
-    private GameObject fxPrefab;
+  private bool isShield;
+  private GameObject fxPrefab;
 
-    public void Activate(ItemData data)
+  public void Activate(ItemData data)
+  {
+    if (isShield) return;
+
+    StartCoroutine(ShieldCoroutine(data.duration, data.fxPrefab ));
+  }
+
+  IEnumerator ShieldCoroutine(float duration, GameObject fx)
+  {
+    isShield = true;
+
+    var controller = GetComponent<CarController>();
+    if (controller != null)
+      controller.isInvincible = true;
+
+    if(fx != null)
     {
-        if (isShield) return;
-
-        StartCoroutine(ShieldCoroutine(data.duration, data.fxPrefab));
+      Debug.Log("쉴드 이펙트 생성됨!");
+      fxPrefab = Instantiate(fx, transform.position, Quaternion.identity, transform);
     }
 
-    IEnumerator ShieldCoroutine(float duration, GameObject fx)
+    yield return new WaitForSeconds(duration);
+
+    if(controller != null)
     {
-        isShield = true;
-
-        var aiController = GetComponent<AICarController>();
-       // var controller = GetComponent<CarController>();
-        //if (controller != null)
-        //    controller.isInvincible = true;
-        if (aiController != null) aiController.isInvincible = true;
-
-        if (fx != null)
-        {
-            Debug.Log("쉴드 이펙트 생성됨!");
-            fxPrefab = Instantiate(fx, transform.position, Quaternion.identity, transform);
-        }
-
-        yield return new WaitForSeconds(duration);
-
-        //if (controller != null)
-        //{
-        //    controller.isInvincible = false;
-        //}
-        if (aiController != null) aiController.isInvincible = false;
-
-        if (fxPrefab != null)
-        {
-            Destroy(fxPrefab);
-        }
-
-        isShield = false;
+      controller.isInvincible = false;
     }
+
+    if (fxPrefab != null)
+    {
+      Destroy(fxPrefab);
+    }
+
+    isShield = false;
+  }
 }

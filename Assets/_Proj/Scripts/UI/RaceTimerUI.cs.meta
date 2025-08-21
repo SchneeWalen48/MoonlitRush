@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/_Proj/Scripts/UI/RaceTimerUI.cs.meta
+guid: c628dd17b498aa847ab016bb26dfc504
+========
+guid: 5510bb38cefed544098e193a7ef3795b
+>>>>>>>> e934671 (Minimap + Dashboard):Assets/_Proj/Scripts/Dashboard/Dashboard.cs.meta
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

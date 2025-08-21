@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/_Proj/Scripts/UI/RaceTimerUI.cs.meta
+guid: acf8e1923eae04d429c0750019a7a434
+========
 guid: 5510bb38cefed544098e193a7ef3795b
+>>>>>>>> e934671 (Minimap + Dashboard):Assets/_Proj/Scripts/Dashboard/Dashboard.cs.meta
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2

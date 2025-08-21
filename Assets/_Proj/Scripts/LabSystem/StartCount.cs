@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -8,7 +8,7 @@ public class StartCount : MonoBehaviour
 {
     public TextMeshProUGUI startCountText;
 
-   //public CarController playerCar;
+   public CarController playerCar;
     public AICarController AICar;
     
 
@@ -39,7 +39,7 @@ public class StartCount : MonoBehaviour
         SetMovement(true);
     }
 
-    //Ä«¿îÆ® Áß ¿òÁ÷ÀÓ ¸·À½
+    //ì¹´ìš´íŠ¸ ì¤‘ ì›€ì§ì„ ë§‰ìŒ
     void SetMovement(bool movement)
     {
         //if (playerCar != null)
@@ -54,5 +54,5 @@ public class StartCount : MonoBehaviour
     }
 }
 
-//ºó ¿ÀºêÁ§Æ®¿¡ ºÎÂø
-//ÇÃ·¹ÀÌ¾î¿¡ bool º¯¼ö ÇÏ³ª Ãß°¡ (ex: moveStart)
+//ë¹ˆ ì˜¤ë¸Œì íŠ¸ì— ë¶€ì°©
+//í”Œë ˆì´ì–´ì— bool ë³€ìˆ˜ í•˜ë‚˜ ì¶”ê°€ (ex: moveStart)
