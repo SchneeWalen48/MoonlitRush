@@ -96,7 +96,7 @@ public class MissileProj : MonoBehaviour
     // 타깃 발견 시 추적
     if (target != null)
     {
-      Vector3 targetPos = target.position + Vector3.up * 2f;
+      Vector3 targetPos = target.position + Vector3.up;
       Vector3 dir = (targetPos - transform.position).normalized;
       rb.velocity = baseVel + dir * speed;
       transform.rotation = Quaternion.LookRotation(rb.velocity, Vector3.up);
