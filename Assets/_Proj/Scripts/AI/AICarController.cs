@@ -102,27 +102,7 @@ public class AICarController : MonoBehaviour
 
         //raycast 중심점                      차체의 앞쪽 범퍼 근처에서 레이 시작 권장
         Vector3 origin = transform.position + Vector3.up * 0.7f + transform.forward * 1.2f;
-        //다운 레이
-        Debug.DrawRay(origin, Vector3.down * downDis, Color.blue);
-        bool isDown = Physics.Raycast(origin, Vector3.down, out RaycastHit downHit, downDis);
-
-        //if (isDown)
-        //{  
-            //    //배럴롤 점프대 감지
-            //    else if (downHit.collider.CompareTag("Barrel"))
-            //    {
-            //        if (isBarrelRolling == false)
-            //        {
-            //            StartCoroutine(BarrelRollRoutine());
-            //            Debug.Log("배럴롤 점프대");
-            //        }
-            //    }
-
-        //}
-        //else { lastSpeedUp = null; }
-
-
-
+       
         UpdateAIControls();
         Suspension();
         GroundCheck();
@@ -423,16 +403,7 @@ public class AICarController : MonoBehaviour
 
         void SidewaysDrag()
         {
-            float currentSidewaysSpeed = carLocalVelocity.x;
-            //float dragMagnitude;
-            //if (isDrifting)
-            //{
-            //    dragMagnitude = -currentSidewaysSpeed * driftingDragCoefficient;
-            //}
-            //else
-            //{
-            //    dragMagnitude = -currentSidewaysSpeed * (currentSpeed > targetSpeed ? brakingDragCoefficient : dragCoefficient); //코너링 시 옆으로 미끄러지는 현상을 더 강하게 제어. 감속과 동시에 코너링 안정성을 높이는 역할
-            //}
+            float currentSidewaysSpeed = carLocalVelocity.x;            
 
             float targetDrag = isDrifting ? dragCoefficient / driftDragMultiplier : dragCoefficient;
             currDragCoefficient = Mathf.Lerp(currDragCoefficient, targetDrag, Time.deltaTime * driftTransitionSpeed);
@@ -477,7 +448,6 @@ public class AICarController : MonoBehaviour
             StopAllCoroutines();
             Debug.Log("완주!");           
         }
-
     }
 
     IEnumerator BoostRoutine(float force, float duration)
@@ -489,25 +459,7 @@ public class AICarController : MonoBehaviour
         Debug.Log("AI 스피드 패드 코루틴 끝");
         maxSpeed -= force;
         isBoosted = false;
-    }
-
-    //배럴롤 코루틴
-    //IEnumerator BarrelRollRoutine()
-    //{
-    //    isBarrelRolling = true;
-    //    Debug.Log("AI 배럴롤 시작");
-    //    //carRB.useGravity = false;        
-    //    // carRB.AddRelativeTorque(Vector3.forward * barrelRollTorque, ForceMode.Acceleration);
-
-    //    yield return new WaitForSeconds(barrelRollDuration); //회전 시간 
-
-    //    isBarrelRolling = false;
-    //    Debug.Log("AI 배럴롤 종료");
-    //    //carRB.useGravity = true;
-
-    //    moveInput = 1f;
-
-    //}
+    }        
 
     IEnumerator SpeedUpRoutine(float force, float duration)
     {        
@@ -519,7 +471,6 @@ public class AICarController : MonoBehaviour
         Debug.Log("AI 슬로프 종료");
         maxSpeed -= force;
         isSpeedUp = false;
-
     }
 
     public IEnumerator HitByMissileCoroutine() //미사일 공격 받을 시 코루틴
@@ -605,8 +556,6 @@ public class AICarController : MonoBehaviour
     // 복구 루틴 코루틴: 웨이포인트 기준 리스폰
     IEnumerator RespawnToNearestWaypoint()
     {
-
-
         isRecovering = true;              
 
         Transform nearest = null;
@@ -629,15 +578,12 @@ public class AICarController : MonoBehaviour
             transform.position = nearest.position + Vector3.up * 1f; //리스폰 지점
             transform.rotation = Quaternion.LookRotation(nearest.forward);
             carRB.velocity = Vector3.zero;
-            carRB.angularVelocity = Vector3.zero;
-            carRB.isKinematic = true;
+            carRB.angularVelocity = Vector3.zero;           
         }
-
-       
-        yield return null;
-        carRB.isKinematic = false;
-
+               
         yield return new WaitForSeconds(recoveryTime);
         isRecovering = false;
+        
+        
     }
 }
