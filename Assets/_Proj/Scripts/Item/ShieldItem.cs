@@ -1,4 +1,4 @@
-Ôªøusing System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -20,23 +20,23 @@ public class ShieldItem : MonoBehaviour
         isShield = true;
 
         var aiController = GetComponent<AICarController>();
-       // var controller = GetComponent<CarController>();
-        //if (controller != null)
-        //    controller.isInvincible = true;
+        var controller = GetComponent<CarController>();
+        if (controller != null)
+            controller.isInvincible = true;
         if (aiController != null) aiController.isInvincible = true;
 
         if (fx != null)
         {
-            Debug.Log("Ïâ¥Îìú Ïù¥ÌéôÌä∏ ÏÉùÏÑ±Îê®!");
+            Debug.Log("ΩØµÂ ¿Ã∆Â∆Æ ª˝º∫µ !");
             fxPrefab = Instantiate(fx, transform.position, Quaternion.identity, transform);
         }
 
         yield return new WaitForSeconds(duration);
 
-        //if (controller != null)
-        //{
-        //    controller.isInvincible = false;
-        //}
+        if (controller != null)
+        {
+            controller.isInvincible = false;
+        }
         if (aiController != null) aiController.isInvincible = false;
 
         if (fxPrefab != null)

@@ -42,10 +42,10 @@ public class StartCount : MonoBehaviour
     //카운트 중 움직임 막음
     void SetMovement(bool movement)
     {
-        if (playerCar != null)
-        {
-            playerCar.moveStart = movement;
-        }
+        //if (playerCar != null)
+        //{
+        //    playerCar.moveStart = movement;
+        //}
 
         if (AICar != null) {
             AICar.moveStart = movement;

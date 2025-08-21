@@ -7,7 +7,7 @@ public class AICarController : MonoBehaviour
     [Header("References")]
     [SerializeField] private Rigidbody carRB;
     [SerializeField] private Transform[] rayPoints;
-    [SerializeField] private LayerMask drivable;
+    [SerializeField] private LayerMask ground;   //drivable
     [SerializeField] private Transform accelerationPoint;
     [SerializeField] private GameObject[] tires = new GameObject[4];
     [SerializeField] private GameObject[] frontTireParent = new GameObject[2];
@@ -107,17 +107,7 @@ public class AICarController : MonoBehaviour
         bool isDown = Physics.Raycast(origin, Vector3.down, out RaycastHit downHit, downDis);
 
         //if (isDown)
-        //{   //슬로프 감지
-
-        //    if (downHit.collider.CompareTag("SpeedUp"))
-        //    {
-        //        Debug.Log($"슬로프 감지. downforce: {downforce}");
-        //        carRB.AddForce(-transform.up * downforce, ForceMode.Acceleration);
-
-        //        StartCoroutine(SpeedUpRoutine());
-
-
-        //    }
+        //{  
             //    //배럴롤 점프대 감지
             //    else if (downHit.collider.CompareTag("Barrel"))
             //    {
@@ -154,7 +144,7 @@ public class AICarController : MonoBehaviour
         //전방 레이캐스트
         RaycastHit hit;
         float rayDistance = 20f; // 레이캐스트 거리
-        if (Physics.Raycast(transform.position, transform.forward, out hit, rayDistance, drivable))
+        if (Physics.Raycast(transform.position, transform.forward, out hit, rayDistance, ground))
         {
             if (hit.collider.CompareTag("Player")) // 플레이어 태그 확인
             {
@@ -198,7 +188,7 @@ public class AICarController : MonoBehaviour
 
         Debug.Log($"Current Angle: {angleToNext}, Current Speed: {currentSpeed}"); //콘솔에 찍힘 그렇담 드리프트 로직이 문제란 소리....
 
-        currentSpeed = carRB.velocity.magnitude * 3.6f; //rigidbody 속도(m/s)를 km/h로 변환               
+        currentSpeed = carRB.velocity.magnitude ; //rigidbody 속도(m/s)를 km/h로 변환               
 
         if (angleToNext > 10f && currentSpeed > 50f && !isDrifting) //급커브 드리프트
         {
@@ -211,19 +201,18 @@ public class AICarController : MonoBehaviour
         }
 
         //코루틴으로 barrelRoll 상태가 true면 AddRelativeTorque 함수로 차량 회전
-        if (isBarrelRolling)
-        {
-            // carRB.AddRelativeTorque(Vector3.right * barrelRollTorque, ForceMode.Acceleration); //z축 배럴롤 forward, x축 배럴롤 right
-            carRB.AddRelativeTorque(Vector3.forward * barrelRollTorque, ForceMode.Acceleration);
-            steerInput = 0;
-            moveInput = 0;
-        }
-        else if (isDrifting)
+        //if (isBarrelRolling)
+        //{
+        //    // carRB.AddRelativeTorque(Vector3.right * barrelRollTorque, ForceMode.Acceleration); //z축 배럴롤 forward, x축 배럴롤 right
+        //    carRB.AddRelativeTorque(Vector3.forward * barrelRollTorque, ForceMode.Acceleration);
+        //    steerInput = 0;
+        //    moveInput = 0;
+        //}
+         if (isDrifting)
         {
             // 드리프트 중에는 조향 강도를 높임            
             steerInput = Mathf.Clamp(localTarget.x / localTarget.magnitude, -1f, 1f) * 5.5f;
-            moveInput = 0.5f;
-            // maxSpeed = 70f;
+            moveInput = 0.5f;         
 
 
         }
@@ -264,7 +253,7 @@ public class AICarController : MonoBehaviour
             RaycastHit hit;
             float maxDistance = restLength;
 
-            if (Physics.Raycast(rayPoints[i].position, -rayPoints[i].up, out hit, maxDistance + wheelRadius, drivable))
+            if (Physics.Raycast(rayPoints[i].position, -rayPoints[i].up, out hit, maxDistance + wheelRadius, ground))
             {
                 wheelsIsGrounded[i] = 1;
 
@@ -471,8 +460,8 @@ public class AICarController : MonoBehaviour
             {               
                 StopCoroutine (speedUpCoroutine);
             }
-            carRB.AddForce(transform.forward * downforce * Time.deltaTime, ForceMode.Acceleration);
-            speedUpCoroutine = StartCoroutine(SpeedUpRoutine(150, 3f));
+            carRB.AddForce((transform.forward * maxSpeed) * downforce, ForceMode.Acceleration);
+            speedUpCoroutine = StartCoroutine(SpeedUpRoutine(50, 3f));
         }
         else if (other.CompareTag("Goal"))
         {

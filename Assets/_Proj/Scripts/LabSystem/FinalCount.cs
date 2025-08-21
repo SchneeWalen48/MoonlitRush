@@ -40,7 +40,7 @@ public class FinalCount : MonoBehaviour
             yield return new WaitForSeconds(1f);
         }
 
-        finalCountText.text = "Game End!";
+        finalCountText.text = "Finish!";
         yield return new WaitForSeconds(1f);
 
         finalCountText.text = "";
