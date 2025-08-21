@@ -16,12 +16,17 @@ public class BoostFX : MonoBehaviour
   public float boostStartSize = 1f;
   public float boostStartSpeed = 5f;
 
-  ParticleSystem.MainModule main;
+  void Awake()
+  {
+    if (!boostTrail) boostTrail = GetComponentInChildren<ParticleSystem>();
+  }
 
+  void OnEnable()
+  {
+    if(!boostTrail) boostTrail= GetComponentInChildren<ParticleSystem>();
+  }
   void Start()
   {
-    if (boostTrail == null) boostTrail = GetComponent<ParticleSystem>();
-    main = boostTrail.main;
     ApplyNormalImmediate();
   }
 
@@ -53,6 +58,8 @@ public class BoostFX : MonoBehaviour
 
   void ApplyNormalImmediate()
   {
+    if (!boostTrail) return;
+    var main = boostTrail.main;
     main.startColor = new ParticleSystem.MinMaxGradient(normalColor);
     main.startSize = normalStartSize;
     main.startSpeed = normalStartSpeed;
@@ -64,20 +71,37 @@ public class BoostFX : MonoBehaviour
     while (t0 < time)
     {
       float a = time <= 0f ? 1f : t0 / time;
+      var main = boostTrail.main;
       main.startColor = new ParticleSystem.MinMaxGradient(Color.Lerp(fromColor, toColor, a));
       main.startSize = Mathf.Lerp(fromSize, toSize, a);
       main.startSpeed = Mathf.Lerp(fromSpeed, toSpeed, a);
       t0 += Time.deltaTime;
       yield return null;
     }
-    main.startColor = new ParticleSystem.MinMaxGradient(toColor);
-    main.startSize = toSize;
-    main.startSpeed = toSpeed;
+    var mainFinal = boostTrail.main;
+    mainFinal.startColor = new ParticleSystem.MinMaxGradient(toColor);
+    mainFinal.startSize = toSize;
+    mainFinal.startSpeed = toSpeed;
   }
 
-  Color GetCurrColor() => ((ParticleSystem.MinMaxGradient)main.startColor).color;
-  float GetCurrSize() => main.startSize.constant;
-  float GetCurrSpeed() => main.startSpeed.constant;
+  Color GetCurrColor()
+  {
+    if (!boostTrail) return normalColor;
+    var main = boostTrail.main;
+    return main.startColor.color;
+  }
+  float GetCurrSize()
+  {
+    if (!boostTrail) return normalStartSize;
+    var main = boostTrail.main;
+    return main.startSize.constant;
+  }
+  float GetCurrSpeed()
+  {
+    if (!boostTrail) return normalStartSpeed;
+    var main = boostTrail.main;
+    return main.startSpeed.constant;
+  }
 
   public void SetEmission(bool on)
   {

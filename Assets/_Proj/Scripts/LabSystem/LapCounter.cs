@@ -36,7 +36,16 @@ public class LapCounter : MonoBehaviour
 
     if (timeText != null && !raceFinished)
     {
-      timeText.text = TimeManager.Instance.GetFormatRaceTime();
+      var tm = TimeManager.Instance;
+      if (tm != null)
+      {
+        
+      timeText.text = tm.GetFormatRaceTime();
+      }
+      else
+      {
+        print("TimeManager is null");
+      }
     }
 
 

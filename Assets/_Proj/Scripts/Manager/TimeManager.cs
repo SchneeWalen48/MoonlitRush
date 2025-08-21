@@ -1,9 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static RaceManager;
-using static TimeManager;
 
 public class TimeManager : MonoBehaviour
 {

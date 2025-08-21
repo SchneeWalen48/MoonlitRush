@@ -85,8 +85,8 @@ public class CarController : MonoBehaviour
   private float currDragCoefficient;
 
   bool readyToReverse = false;
-  float moveInput = 0;
-  float steerInput = 0;
+  [HideInInspector] public float moveInput = 0;
+  [HideInInspector] public float steerInput = 0;
   bool isDrifting = false;
   #endregion
 
