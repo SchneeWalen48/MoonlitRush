@@ -9,14 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d4ed4b042243c4747b26ac415e709754, type: 3}
+  m_Script: {fileID: 11500000, guid: c916e1542ee5de14d8a8a04496a2f730, type: 3}
   m_Name: Missile
   m_EditorClassIdentifier: 
-  itemName: Missile
+  itemName: 
   description: 
   type: 1
-  icon: {fileID: 21300000, guid: 2668bdc2b82135e47bdd0bf98877c14b, type: 3}
-  fxPrefab: {fileID: 1722081097931586, guid: 4b21d5ab091be5a46ad6e87699fab62c, type: 3}
+  icon: {fileID: 21300000, guid: 8da7ae1e407cbb7429e7d968e00f460a, type: 3}
+  fxPrefab: {fileID: 1879769179923522, guid: 65932b7368590234d8163da03c2055d8, type: 3}
   duration: 3
-  power: 10
+  power: 100
   useSound: {fileID: 0}

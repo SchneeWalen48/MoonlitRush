@@ -46,7 +46,7 @@ public class TimeManager : MonoBehaviour
     {
         // 에디터에서 빈 씬에서 테스트 할때 Play 누르자마자 실행되게 만들었음. 씬 여러개 연결되면 시작 타임 정해주고(카운트다운 이후 등) 삭제.
 #if UNITY_EDITOR
-        StartTimer();
+        //StartTimer();
 #endif
     }
 
@@ -104,26 +104,39 @@ public class TimeManager : MonoBehaviour
         totalPausedDuration = 0f;
     }
 
-    //public void RecordFinishTime(string pName, float fTime)
-    //{
-    //    string name = string.IsNullOrWhiteSpace(pName)
-    //    ? (string.IsNullOrWhiteSpace(NicknameInput.PlayerNickname) ? "Player" : NicknameInput.PlayerNickname)
-    //    : pName;
+    public void RecordFinishTime(string name, float fTime)
+    {
+        // 이름 보정(빈 값이면 PlayerPrefs 닉네임)
+        var safeName = string.IsNullOrWhiteSpace(name)
+            ? PlayerPrefs.GetString("PlayerNickname", "Player")
+            : name;
 
-    //    var exist = data.FirstOrDefault(d => d.playerName == pName);
-    //    if (exist != null)
-    //    {
-    //        exist.finishTime = Mathf.Min(exist.finishTime, fTime);
-    //        return;
-    //    }
+        var exist = data.FirstOrDefault(d => d.playerName == safeName);
+        if (exist != null)
+        {
+            exist.finishTime = Mathf.Min(exist.finishTime, fTime);
+            return;
+        }
 
+        data.Add(new PlayerTimeData
+        {
+            playerName = safeName,
+            finishTime = fTime,
+            finished = true
+        });
+    }
 
-    //    data.Add(new PlayerTimeData
-    //    {
-    //        playerName = pName,
-    //        finishTime = fTime,
-    //    });
-    //}
+    // RacerInfo로 기록
+    public void RecordFinishTime(RacerInfo ri, float fTime)
+    {
+        var safeName =
+            (ri != null && !string.IsNullOrWhiteSpace(ri.displayName))
+            ? ri.displayName
+            : PlayerPrefs.GetString("PlayerNickname", "Player");
+
+        RecordFinishTime(safeName, fTime);
+    }
+
     public List<PlayerTimeData> GetRanking()
     {
         return data.OrderBy(p => p.finishTime).ToList(); // Sort racing records by fastest time

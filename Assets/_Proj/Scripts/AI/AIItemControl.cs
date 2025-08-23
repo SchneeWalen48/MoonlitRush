@@ -27,16 +27,19 @@ public class AIItemControl : MonoBehaviour
             switch (item.type)
             {
                 case ItemType.Booster:
-                    if (IsStraightRoad()) { Use(i); break; }
+                    if (IsStraightRoad()) { Debug.Log("아이템: 부스터 사용"); Use(i); break; }
                     //직선 구간에서 사용
+                    
                     break;
                 case ItemType.Missile:
-                    if (HasTargetAhead()) { Use(i); break; }
+                    if (HasTargetAhead()) { Debug.Log("아이템: 미사일 사용"); Use(i); break; }
                     //앞에 상대가 있으면 사용
+                   
                     break;
                 case ItemType.Shield:
-                    if (IsThreatDetected()) { Use(i); break; }
+                    if (IsThreatDetected()) { Debug.Log("아이템: 실드 사용"); Use(i); break; }
                     //미사일 공격 받을 시 사용(확률 5:5)
+                   
                     break;
             }
         }
@@ -46,8 +49,7 @@ public class AIItemControl : MonoBehaviour
     public void PickupItem(ItemData item)
     {
         if (itemInventory.Count >= 2) return; // 최대 2개까지만 보유
-        itemInventory.Add(item);
-        Debug.Log("AI 아이템 획득: " + item.itemName);
+        itemInventory.Add(item);        
     }
 
     // 실제 사용 처리
@@ -68,6 +70,7 @@ public class AIItemControl : MonoBehaviour
         }
 
         itemInventory.RemoveAt(index); // 사용 후 제거
+        Debug.Log("아이템 사용 후 제거됨");
         lastDecisionTime = Time.time;
     }
 
@@ -106,7 +109,8 @@ public class AIItemControl : MonoBehaviour
         if (Physics.Raycast(transform.position, transform.forward, out hit, 30f))
         {
             if (hit.collider.CompareTag("Player") || hit.collider.CompareTag("AIPlayer"))
-                return true;
+            { return true; } // 플레이어인지 판단
+            else { return false; } //벽 등 장애물이라면 미사일 발사 X
         }
         return false;
     }

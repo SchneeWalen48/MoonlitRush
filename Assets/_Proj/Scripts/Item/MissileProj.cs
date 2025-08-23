@@ -1,4 +1,4 @@
-ï»¿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum Team { Player, AI }
@@ -18,7 +18,7 @@ public class MissileProj : MonoBehaviour
   [SerializeField] float inheritDecayPerSec = 0f;
   Vector3 inheritedVel;
 
-  [SerializeField] private bool debugTestMode = false; // ì”¬ì— ë‘” í…ŒìŠ¤íŠ¸ìš©ì´ë©´ ì²´í¬
+  [SerializeField] private bool debugTestMode = false; // ¾À¿¡ µĞ Å×½ºÆ®¿ëÀÌ¸é Ã¼Å©
 
 
   void Start()
@@ -27,20 +27,20 @@ public class MissileProj : MonoBehaviour
     
     if (debugTestMode)
     {
-      // ì œìë¦¬ ê³ ì •, Init() ì•ˆ ë¶ˆë ¤ë„ ì¶©ëŒ ì‚´ì•„ìˆìŒ
+      // Á¦ÀÚ¸® °íÁ¤, Init() ¾È ºÒ·Áµµ Ãæµ¹ »ì¾ÆÀÖÀ½
       if (rb != null)
       {
         rb.isKinematic = true;
         rb.velocity = Vector3.zero;
       }
-      me = null; // ìê¸° ìì‹  íŒì • ì—†ì•°
+      me = null; // ÀÚ±â ÀÚ½Å ÆÇÁ¤ ¾ø¾Ú
     }
   }
   public void Init(float power, float duration, GameObject shooter, GameObject fxPrefab, Transform fwdBasis = null)
   {
     rb = GetComponent<Rigidbody>();
-    speed = power; // ItemDataì—ì„œ ë®ì–´ì”€
-    me = shooter; // ItemDataì—ì„œ ë®ì–´ì”€
+    speed = power; // ItemData¿¡¼­ µ¤¾î¾¸
+    me = shooter; // ItemData¿¡¼­ µ¤¾î¾¸
     lifeTime = duration;
     explosionFx = fxPrefab;
 
@@ -69,12 +69,14 @@ public class MissileProj : MonoBehaviour
   {
     if (rb == null) return;
 
-    Vector3 fwd = (rb.velocity.sqrMagnitude > 0.01f) ? rb.velocity.normalized 
+        Debug.Log($"¹Ì»çÀÏ ¼Óµµ: {rb.velocity.magnitude}");
+
+        Vector3 fwd = (rb.velocity.sqrMagnitude > 0.01f) ? rb.velocity.normalized 
       : (launchFwd != Vector3.zero ? launchFwd : transform.forward);
 
-    // ê°€ì¥ ê°€ê¹Œìš´ ëŒ€ìƒ íƒìƒ‰
-    // ì£¼ì²´ Player => AIíƒìƒ‰
-    // ì£¼ì²´ AI => AI + Player íƒìƒ‰
+    // °¡Àå °¡±î¿î ´ë»ó Å½»ö
+    // ÁÖÃ¼ Player => AIÅ½»ö
+    // ÁÖÃ¼ AI => AI + Player Å½»ö
     if (target == null)
     {
       List<GameObject> racers = new List<GameObject>();
@@ -90,7 +92,7 @@ public class MissileProj : MonoBehaviour
         var allAIs = GameObject.FindGameObjectsWithTag("AIPlayer");
         foreach (var ai in allAIs)
         {
-          if (me != null && ai == me || ai.transform.IsChildOf(me.transform)) continue; // ìì‹  ì œì™¸
+          if (me != null && ai == me || ai.transform.IsChildOf(me.transform)) continue; // ÀÚ½Å Á¦¿Ü
           racers.Add(ai);
         }
 
@@ -116,7 +118,7 @@ public class MissileProj : MonoBehaviour
         Vector3 toTarget = (racer.transform.position - transform.position).normalized;
         float dot = Vector3.Dot(fwd, toTarget);
 
-        // ì „ë°© 75ë„ ì´ë‚´ë§Œ íƒì§€
+        // Àü¹æ 75µµ ÀÌ³»¸¸ Å½Áö
         if (dot > Mathf.Cos(75f * Mathf.Deg2Rad) && dist < minDist)
         {
           target = racer.transform;
@@ -126,7 +128,7 @@ public class MissileProj : MonoBehaviour
     }
     Vector3 baseVel = inheritedVel;
 
-    // íƒ€ê¹ƒ ë°œê²¬ ì‹œ ì¶”ì 
+    // Å¸±ê ¹ß°ß ½Ã ÃßÀû
     if (target != null)
     {
       Vector3 targetPos = target.position + Vector3.up;
@@ -134,7 +136,7 @@ public class MissileProj : MonoBehaviour
       rb.velocity = baseVel + dir * speed;
       transform.rotation = Quaternion.LookRotation(rb.velocity, Vector3.up);
     }
-    // íƒ€ê²Ÿ ì—†ìœ¼ë©´ ì§ì„ 
+    // Å¸°Ù ¾øÀ¸¸é Á÷¼±
     else
     {
       rb.velocity = baseVel + launchFwd * speed;
@@ -150,9 +152,9 @@ public class MissileProj : MonoBehaviour
   {
     if (me != null && (collision.transform == me.transform || collision.transform.IsChildOf(me.transform))) return;
 
-    print("ì¶©ëŒ " + collision.gameObject.name);
+    print("Ãæµ¹ " + collision.gameObject.name);
 
-    // ë¯¸ì‚¬ì¼ ë§ì•˜ì„ ë•Œ
+    // ¹Ì»çÀÏ ¸Â¾ÒÀ» ¶§
     var car = collision.gameObject.GetComponent<CarController>();
     var aiCar = collision.gameObject.GetComponent<AICarController>();
 
@@ -160,7 +162,7 @@ public class MissileProj : MonoBehaviour
 
     if (car != null)
     {
-      // CarControllerì— ìˆëŠ” ì¶©ëŒ íš¨ê³¼ ë°œë™
+      // CarController¿¡ ÀÖ´Â Ãæµ¹ È¿°ú ¹ßµ¿
       car.StartCoroutine(car.HitByMissileCoroutine());
     }
 

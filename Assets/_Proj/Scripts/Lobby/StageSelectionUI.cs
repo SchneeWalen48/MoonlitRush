@@ -60,7 +60,7 @@ public class StageSelectManager : MonoBehaviour
         if (selectedStageIndex != -1)
         {
       //선택된 스테이지 인덱스를 기반으로 scene 로드
-      UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene");
+      UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
         }
         else
         {
