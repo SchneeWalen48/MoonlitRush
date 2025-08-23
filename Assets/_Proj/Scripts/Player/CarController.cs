@@ -32,6 +32,7 @@ public class CarController : MonoBehaviour
 
   int[] wheelIsGrounded = new int[4];
   bool isGrounded = false;
+  public bool isFinished;
   public bool isInvincible { get; set; }
 
   [Header("Reverse")]
@@ -150,6 +151,7 @@ public class CarController : MonoBehaviour
 
   void Update()
   {
+    if(isFinished) return;
     GetPlayerInput();
     currSpeed = rb.velocity.magnitude;
     EngineSound();
@@ -753,7 +755,39 @@ public class CarController : MonoBehaviour
           StartCoroutine(BoostPadCoroutine(targetBoostSpeed, 1.5f));
         }
       }
+      if (other.CompareTag("Goal"))
+      {
+        if (isFinished) return;
+
+        StartCoroutine(SmoothStop(2f));
+        FinalCount.Instance.FinishPlayer();
+      }
     }
+  }
+  public IEnumerator SmoothStop(float duration = 1.5f)
+  {
+    isFinished = true;
+
+    // 엑셀은 즉시 막고, 핸들은 계속 살아 있게 둠
+    moveInput = 0;
+
+    float timer = 0f;
+    Vector3 initVel = rb.velocity;
+    Vector3 initAngularVel = rb.angularVelocity;
+
+    while (timer < duration)
+    {
+      float t = timer / duration;
+
+      rb.velocity = Vector3.Lerp(initVel, Vector3.zero, t);
+      rb.angularVelocity = Vector3.Lerp(initAngularVel, Vector3.zero, t);
+
+      timer += Time.deltaTime;
+      yield return null;
+    }
+
+    rb.velocity = Vector3.zero;
+    rb.angularVelocity = Vector3.zero;
   }
   #endregion
 
