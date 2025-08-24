@@ -760,7 +760,7 @@ public class CarController : MonoBehaviour
         if (isFinished) return;
 
         StartCoroutine(SmoothStop(2f));
-        FinalCount.Instance.FinishPlayer();
+        FinalCount.Instance.Finish();
       }
     }
   }
