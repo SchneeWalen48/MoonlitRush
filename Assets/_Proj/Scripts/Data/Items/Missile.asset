@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c916e1542ee5de14d8a8a04496a2f730, type: 3}
   m_Name: Missile
   m_EditorClassIdentifier: 
-  itemName: 
+  itemName: MissileItem
   description: 
   type: 1
   icon: {fileID: 21300000, guid: 8da7ae1e407cbb7429e7d968e00f460a, type: 3}

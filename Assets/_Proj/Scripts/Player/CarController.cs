@@ -732,7 +732,7 @@ public class CarController : MonoBehaviour
         rb.AddForce(transform.forward * acceleration * 30f, ForceMode.Acceleration); // 슬로프 탈 때 속도 감속 강제 보정
 
         float targetBoostSpeed = maxSpeed * 1.25f; // 내 차 최고속도의 125%
-        ApplyTransientOverdrive(add: maxSpeed * 0.12f, minFwdIfLower: maxSpeed * 0.5f);
+        ApplyTransientOverdrive(add: maxSpeed * 0.15f, minFwdIfLower: maxSpeed * 0.5f);
       }
 
       if (other.CompareTag("Barrel"))
