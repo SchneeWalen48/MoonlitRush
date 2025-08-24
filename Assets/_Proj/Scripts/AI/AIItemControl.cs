@@ -5,7 +5,7 @@ using UnityEngine;
 public class AIItemControl : MonoBehaviour
 {
     private List<ItemData> itemInventory = new List<ItemData>(); // 보유 아이템 리스트
-    private float decisionDelay = 1f; // 사용 판단 간격
+    private float decisionDelay = 3f; // 사용 판단 간격
     private float lastDecisionTime; //마지막 사용 시간
     private Transform aiTransform;
     
