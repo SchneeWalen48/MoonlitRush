@@ -7,6 +7,9 @@ public class TimeManager : MonoBehaviour
     // Singleton Instance : Accessible from anywhere
     public static TimeManager Instance;
 
+    [Header("Podium")]
+    public GameObject winnerPodiumPrefab;
+
     public class PlayerTimeData
     {
         public string playerName;
@@ -85,13 +88,14 @@ public class TimeManager : MonoBehaviour
     }
 
     // Returns elapsed time as a string (minutes:seconds.milliseconds)
-    public string GetFormatRaceTime()
+    public static string FormatTime(float t)
     {
-        float time = RaceDuration;
-        int minutes = Mathf.FloorToInt(time / 60);
-        float seconds = time % 60;
-        return $"{minutes:00}:{seconds:00.000}";
+        int m = Mathf.FloorToInt(t / 60f);
+        float s = t % 60f;
+        return $"{m:00}:{s:00.000}";
     }
+
+    public string GetFormatRaceTime() => FormatTime(RaceDuration);
 
     // Reset Timer
     public void ResetTimer()
@@ -102,39 +106,33 @@ public class TimeManager : MonoBehaviour
         isPaused = false;
         pausedTime = 0f;
         totalPausedDuration = 0f;
+        winnerPodiumPrefab = null;
     }
 
     public void RecordFinishTime(string name, float fTime)
     {
-        // 이름 보정(빈 값이면 PlayerPrefs 닉네임)
-        var safeName = string.IsNullOrWhiteSpace(name)
+        string safe = string.IsNullOrWhiteSpace(name)
             ? PlayerPrefs.GetString("PlayerNickname", "Player")
             : name;
 
-        var exist = data.FirstOrDefault(d => d.playerName == safeName);
-        if (exist != null)
-        {
-            exist.finishTime = Mathf.Min(exist.finishTime, fTime);
-            return;
-        }
+        var exist = data.FirstOrDefault(d => d.playerName == safe);
+        if (exist != null) { exist.finishTime = Mathf.Min(exist.finishTime, fTime); return; }
 
-        data.Add(new PlayerTimeData
-        {
-            playerName = safeName,
-            finishTime = fTime,
-            finished = true
-        });
+        data.Add(new PlayerTimeData { playerName = safe, finishTime = fTime, finished = true });
     }
 
-    // RacerInfo로 기록
     public void RecordFinishTime(RacerInfo ri, float fTime)
     {
-        var safeName =
-            (ri != null && !string.IsNullOrWhiteSpace(ri.displayName))
+        string safe = (ri && !string.IsNullOrWhiteSpace(ri.displayName))
             ? ri.displayName
             : PlayerPrefs.GetString("PlayerNickname", "Player");
+        RecordFinishTime(safe, fTime);
+    }
 
-        RecordFinishTime(safeName, fTime);
+    public void TrySetWinnerPrefab(RacerInfo ri)
+    {
+        if (!winnerPodiumPrefab && ri && ri.podiumDisplayPrefab)
+            winnerPodiumPrefab = ri.podiumDisplayPrefab;
     }
 
     public List<PlayerTimeData> GetRanking()

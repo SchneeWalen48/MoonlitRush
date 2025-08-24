@@ -1,27 +1,42 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using PlayerTimeData = TimeManager.PlayerTimeData;
 
-// Ending Ranking UI
 public class RankingUI : MonoBehaviour
 {
-  public GameObject rankingPanel; // for RankingUI activate/deactivate
-  [Tooltip("Layout Group")]
-  public Transform rankingListParent; // ex) layout group
-  public GameObject rankingEntryPrefab; // A prefab that displays one player's record
+    [Header("References")]
+    public GameObject rankingPanel;
+    public Transform rankingListParent;
+    public GameObject rankingEntryPrefab;
 
-  public void ShowRanking(List<TimeManager.PlayerTimeData> ranking)
-  {
-    rankingPanel.SetActive(true); // open the panel
+    [Header("Options")]
+    public bool autoPopulateOnStart = false; // 필요할 때만 Start에서 자동 채움
 
-    foreach (Transform child in rankingListParent)
-      Destroy(child.gameObject); // Remove existing content
-
-    // Iterate through the ranking list and create UI items one by one
-    for (int i = 0; i < ranking.Count; i++)
+    void Start()
     {
-      var rankPrefab = Instantiate(rankingEntryPrefab, rankingListParent);
-      var rankUI = rankPrefab.GetComponent<RankingPrefab>();
-      rankUI.SetUI(i + 1, ranking[i].playerName, ranking[i].finishTime);
+        if (!autoPopulateOnStart) return;
+
+        var data = TimeManager.Instance ? TimeManager.Instance.GetRanking() : null;
+        if (data != null) ShowRanking(data);
     }
-  }
+
+    public void ShowRanking(List<PlayerTimeData> results)
+    {
+        if (rankingPanel) rankingPanel.SetActive(true);
+        if (rankingListParent == null || rankingEntryPrefab == null || results == null)
+        {
+            Debug.LogWarning("[RankingUI] refs or data missing.");
+            return;
+        }
+
+        for (int i = rankingListParent.childCount - 1; i >= 0; i--)
+            Destroy(rankingListParent.GetChild(i).gameObject);
+
+        for (int i = 0; i < results.Count; i++)
+        {
+            var row = Instantiate(rankingEntryPrefab, rankingListParent);
+            var ui = row.GetComponent<RankingPrefab>();
+            if (ui != null) ui.Set(i + 1, results[i].playerName, TimeManager.FormatTime(results[i].finishTime));
+        }
+    }
 }
