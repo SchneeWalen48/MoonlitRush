@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 public class AICarController : MonoBehaviour
@@ -26,8 +27,8 @@ public class AICarController : MonoBehaviour
     public WaypointTest WaypointTest;
     private int currentWaypointIndex = 0;
     private float targetSpeed; //웨이포인트용
-    [HideInInspector]public float moveInput = 0;
-    [HideInInspector]public float steerInput = 0;
+    [HideInInspector] public float moveInput = 0;
+    [HideInInspector] public float steerInput = 0;
 
     [Header("Car settings")]
     [SerializeField] private float acceleration = 25f;
@@ -52,7 +53,7 @@ public class AICarController : MonoBehaviour
     [SerializeField] private float tireRotSpeed = 3000f;
     [SerializeField] private float maxSteeringAngle = 30f;
     [SerializeField] private float minSideSkidVel = 10f;
-   
+
 
     [Header("Drift")] //player 스크립트에서 가져옴
     [SerializeField] private float driftDragMultiplier = 2f;
@@ -60,8 +61,8 @@ public class AICarController : MonoBehaviour
     private float currDragCoefficient;
 
     [Header("Recovery Settings")]
-    [SerializeField] private float stuckTimeThreshold = 1.5f; // 멈췄다고 판단하는 시간 (초)
-    [SerializeField] private float recoveryTime = 1f;      // 복구 후 다시 움직이는 딜레이
+    [SerializeField] private float stuckTimeThreshold = 3f; // 멈췄다고 판단하는 시간 (초)
+    [SerializeField] private float recoveryTime = 2f;      // 복구 후 다시 움직이는 딜레이
     [SerializeField] private float rotationResetSpeed = 1f; // 회전 복구 속도
 
     [Header("SpeedBoostPad")]
@@ -70,8 +71,8 @@ public class AICarController : MonoBehaviour
     Coroutine boostCoroutine; //스피드 발판
     bool isSpeedUp = false;
     public float speedUpDuration = 2f;
-    public float downforce = 60f;
-    public float forwardForce = 20f;
+    private float downforce = 60f;
+    private float forwardForce = 20f;
     Coroutine speedUpCoroutine;
 
     [Header("Etc")]
@@ -83,7 +84,7 @@ public class AICarController : MonoBehaviour
     private Vector3 lastPosition;
     private float stuckTimer;
     private bool isRecovering = false;
-    public  bool isFinished = false;
+    public bool isFinished = false;
     private void Start()
     {
         carRB = GetComponent<Rigidbody>();
@@ -92,10 +93,10 @@ public class AICarController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (moveStart == false) return;
+        // if (moveStart == false) return;
 
-        if (WaypointTest == null || WaypointTest.Count == 0) return;              
-       
+        if (WaypointTest == null || WaypointTest.Count == 0) return;
+
         UpdateAIControls();
         Suspension();
         GroundCheck();
@@ -108,7 +109,7 @@ public class AICarController : MonoBehaviour
     }
 
     void UpdateAIControls()
-    {        
+    {
         Vector3 target = WaypointTest.GetWaypoint(currentWaypointIndex).position;
         Vector3 localTarget = transform.InverseTransformPoint(target); //InverseTransformPoint(): 월드 좌표를 현재 차량의 로컬 좌표계로 변환
 
@@ -159,25 +160,28 @@ public class AICarController : MonoBehaviour
 
         Debug.Log($"Current Angle: {angleToNext}, Current Speed: {currentSpeed}"); //콘솔에 이상한 값이 찍힘 그렇담 드리프트 로직이 문제란 소리...., 픽시드 업데이트에서 디버그 찍는 중이라 계속 나오는 게 당연
 
-        currentSpeed = carRB.velocity.magnitude;               
+        currentSpeed = carRB.velocity.magnitude;
 
-        if (angleToNext > 25f && currentSpeed > 20f || Mathf.Abs(carLocalVelocity.x) > 5f) //급커브 드리프트
+
+        if (angleToNext > 20f && currentSpeed > 20f || Mathf.Abs(carLocalVelocity.x) > 5f) //급커브 드리프트
         {
             isDrifting = true;
+
             Debug.Log($"Drifting started! Angle: {angleToNext}, Speed: {currentSpeed}"); //이게 연속으로 나오면 문제있음
         }
-        else if (angleToNext < 18f && isDrifting && Mathf.Abs(carLocalVelocity.x) < 2f)
+        else if (angleToNext < 15f && isDrifting && Mathf.Abs(carLocalVelocity.x) < 2f)
         { //직선 구간
             isDrifting = false;
+
         }
 
-        
-         if (isDrifting)
+
+        if (isDrifting)
         {
             // 드리프트 중에는 조향 강도를 높임            
             steerInput = Mathf.Clamp(localTarget.x / localTarget.magnitude, -1f, 1f) * 3.5f;
-            moveInput = 0.5f;         
-            
+            moveInput = 0.5f;
+
 
         }
         else // 드리프트 중이 아닐 때, 일반 주행 로직을 실행
@@ -189,7 +193,7 @@ public class AICarController : MonoBehaviour
             if (currentSpeed < targetSpeed)
             {
                 moveInput = 1f;
-                
+
             }
             else
             {//목표 속도에 도달하면 가속을 멈추거나 필요 시 감소
@@ -209,7 +213,7 @@ public class AICarController : MonoBehaviour
         if (distance < 10f || dotWP < 0f)
         {                                                  //마지막에 도달하면 다시 0부터 시작(루프)
             currentWaypointIndex = (currentWaypointIndex + 1) % WaypointTest.Count;
-        }              
+        }
     }
 
     void Suspension()
@@ -340,7 +344,7 @@ public class AICarController : MonoBehaviour
         if (!isGrounded)
         {
             Air();
-        } 
+        }
         else if (isGrounded)
         {
             Debug.Log("공중 제어 X, 일반 주행 시작");
@@ -356,25 +360,23 @@ public class AICarController : MonoBehaviour
             {
                 carRB.AddForceAtPosition(acceleration * moveInput * carRB.transform.forward, accelerationPoint.position, ForceMode.Acceleration);
             }
-
-            Debug.Log(carLocalVelocity.z);
         }
 
         void Decelerate()
         {
-            if (isDrifting && carLocalVelocity.z > targetSpeed)
+            if (isDrifting && carLocalVelocity.z > targetSpeed) //드리프트 중
             {
-                carRB.AddForce(brakingDeceleration * -carRB.transform.forward, ForceMode.Acceleration);
+                carRB.AddForce((brakingDeceleration * 0.4f) * -carRB.transform.forward, ForceMode.Acceleration);
             }
             // AI는 키 입력 대신 속도에 따라 감속
-            else if (!isDrifting && carLocalVelocity.z > targetSpeed)
+            else if (!isDrifting && carLocalVelocity.z > targetSpeed) //일반주행
             {
                 carRB.AddForce(brakingDeceleration * -carRB.transform.forward, ForceMode.Acceleration);
             }
             else if (Mathf.Abs(carLocalVelocity.z) > 0 && moveInput == 0) //moveinput이 0일 때만 자연 감속
             {
                 // 가속하지 않을 때 자연스러운 감속
-                carRB.AddForce(deceleration * carVelocityRatio * -carRB.transform.forward, ForceMode.Acceleration);
+                carRB.AddForce(deceleration * -carRB.transform.forward, ForceMode.Acceleration);
             }
         }
 
@@ -385,9 +387,9 @@ public class AICarController : MonoBehaviour
 
         void SidewaysDrag()
         {
-            float currentSidewaysSpeed = carLocalVelocity.x;            
+            float currentSidewaysSpeed = carLocalVelocity.x;
 
-            float targetDrag = isDrifting ? dragCoefficient / driftDragMultiplier : dragCoefficient;
+            float targetDrag = isDrifting ? dragCoefficient * driftDragMultiplier : dragCoefficient;
             currDragCoefficient = Mathf.Lerp(currDragCoefficient, targetDrag, Time.deltaTime * driftTransitionSpeed);
             float dragMagnitude = -currentSidewaysSpeed * currDragCoefficient;
 
@@ -400,20 +402,20 @@ public class AICarController : MonoBehaviour
         {
             Debug.Log("공중 제어");
             steerInput = 0;
-            moveInput = 0;            
+            moveInput = 0;
             carRB.angularVelocity *= 0.9f;
+            carRB.AddForce(Vector3.down * 100f);
             //수직
             //Vector3 velo = carRB.velocity;
             //velo.y *= 0.8f;
             //carRB.velocity = velo;
-            carRB.AddForce(Vector3.down * 25f);
 
             //수평 유도
             Quaternion targetPos = Quaternion.Euler(0, carRB.transform.eulerAngles.y, 0);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetPos, Time.fixedDeltaTime * 1.2f);
         }
     }
-    
+
     public void OnTriggerEnter(Collider other)
     {
         if (isBoosted) return;
@@ -429,53 +431,131 @@ public class AICarController : MonoBehaviour
             }
             if (boostApplyer != null)
             {
-                boostApplyer.ApplyBoost(2f, 1f, 2f);
+                boostApplyer.ApplyBoost(2f, 1f, 1.5f);
             }
 
-            boostCoroutine = StartCoroutine(BoostRoutine(50, 1.5f));
+            boostCoroutine = StartCoroutine(BoostRoutine(40, 1.5f));
         }
         else if (other.CompareTag("SpeedUp"))
-        {        
+        {
 
             isSpeedUp = true;
             if (speedUpCoroutine != null)
-            {               
-                StopCoroutine (speedUpCoroutine);
+            {
+                StopCoroutine(speedUpCoroutine);
             }
             if (boostApplyer != null)
             {
-                boostApplyer.ApplyBoost(2f, 1f, 2f);
+                boostApplyer.ApplyBoost(2f, 1f, 1.5f);
             }
 
             carRB.AddForce((transform.forward * forwardForce), ForceMode.Acceleration);
-            carRB.AddForce(Vector3.down * downforce, ForceMode.Acceleration);
-            speedUpCoroutine = StartCoroutine(SpeedUpRoutine(50, 1.5f));
+            carRB.AddForce((Vector3.down * downforce) * 5, ForceMode.Acceleration);
+            speedUpCoroutine = StartCoroutine(SpeedUpRoutine(40, 1.5f));
         }
         else if (other.CompareTag("Goal"))
         {
             if (isFinished) return;
 
-            StartCoroutine(SmoothStop(2f));
-            //FinalCount.Instance.FinishAI();
-            Debug.Log("완주!");           
+            StartCoroutine(SmoothStop(2f));           
+            Debug.Log("완주!");
         }
     }
 
     IEnumerator BoostRoutine(float force, float duration)
     {
         Debug.Log("AI 부스트 패드 코루틴 시작");
-        Vector3 localVelocity = carRB.transform.InverseTransformDirection(carRB.velocity); //현재속도를 강제로 끌어올림
+
+        // 초기 속도 강제 설정
+        Vector3 localVelocity = transform.InverseTransformDirection(carRB.velocity);
         localVelocity.z = Mathf.Max(localVelocity.z, force);
         carRB.velocity = transform.TransformDirection(localVelocity);
-        yield return new WaitForSeconds(duration);
 
-        Debug.Log("AI 부스트 패드 코루틴 끝");
-        
+        float timer = 0f;
+
+        while (timer < duration)
+        {
+            timer += Time.deltaTime;
+
+            // 현재 웨이포인트
+            Vector3 target = WaypointTest.GetWaypoint(currentWaypointIndex).position;
+            Vector3 localTarget = transform.InverseTransformPoint(target);
+            float angleToNext = Vector3.Angle(transform.forward, (target - transform.position).normalized);
+
+            // 공중 제어
+            if (!isGrounded)
+            {
+                Vector3 lv = transform.InverseTransformDirection(carRB.velocity);
+
+                // 전진 속도 제한
+                lv.z = Mathf.Min(lv.z, 20f);
+
+                // 좌우 속도 제한
+                lv.x = Mathf.Clamp(lv.x, -5f, 5f);
+
+                // 수직 속도 제한 (너무 급하게 떨어지지 않도록)
+                lv.y = Mathf.Max(lv.y, -150f);
+
+                carRB.velocity = transform.TransformDirection(lv);
+
+                // 공중에서도 드리프트 유지
+                isDrifting = true;
+
+                // 착지 직전 약간 스티어 보정
+                if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 3f))
+                {
+                    float steerBoost = 1.5f;
+                    carRB.AddRelativeTorque(steerStrength * steerInput * steerBoost * carRB.transform.up, ForceMode.Acceleration);
+                }
+            }
+            else
+            {
+                //착지 직후 가속 보조 (최소 속도 유지)
+                Vector3 lv = transform.InverseTransformDirection(carRB.velocity);
+                float minSpeed = targetSpeed * 0.6f; // 필요에 따라 0.5~0.7 정도 조절 가능
+                if (lv.z < minSpeed)
+                {
+                    lv.z = minSpeed;
+                    carRB.velocity = transform.TransformDirection(lv);
+                }
+
+                // 지면 위 커브 제어
+                if (angleToNext > 25f)
+                {
+                    lv = transform.InverseTransformDirection(carRB.velocity);
+                    lv.x *= 0.5f; // 좌우 미끄러짐 줄이기
+                    carRB.velocity = transform.TransformDirection(lv);
+
+                    float steerBoost = 2f;
+                    carRB.AddRelativeTorque(steerStrength * steerInput * steerBoost * carRB.transform.up, ForceMode.Acceleration);
+
+                    // 약간 감속 적용
+                    carRB.AddForce(-carRB.transform.forward * brakingDeceleration * 0.2f, ForceMode.Acceleration);
+
+                    isDrifting = true;
+                }
+                else
+                {
+                    // 커브가 아니면 드리프트 해제
+                    isDrifting = false;
+                }
+            }
+
+            yield return null;
+        }
+
+        // 부스터 종료 직전 속도를 targetSpeed에 맞춤
+        Vector3 finalLv = transform.InverseTransformDirection(carRB.velocity);
+        finalLv.z = Mathf.Min(finalLv.z, targetSpeed);
+        carRB.velocity = transform.TransformDirection(finalLv);
+
+        Debug.Log("AI 부스트 패드 코루틴 끝");           
+
         isBoosted = false;
-    }        
+    }
 
     IEnumerator SpeedUpRoutine(float force, float duration)
-    {        
+    {
         Debug.Log("AI 슬로프 시작");
         Vector3 localVelocity = carRB.transform.InverseTransformDirection(carRB.velocity);
         localVelocity.z = Mathf.Max(localVelocity.z, force);
@@ -484,7 +564,7 @@ public class AICarController : MonoBehaviour
         yield return new WaitForSeconds(duration);
 
         Debug.Log("AI 슬로프 종료");
-        
+
         isSpeedUp = false;
     }
 
@@ -517,6 +597,7 @@ public class AICarController : MonoBehaviour
 
         Vector3 localVel = transform.InverseTransformDirection(carRB.velocity); //속도를 차량 로컬 좌표계로 바꿈
         localVel.x *= 0.5f; //차량 튕기는 방향 조절
+        localVel.z = Mathf.Max(localVel.z, 5f); // 최소 전진 속도 추가
         carRB.velocity = transform.TransformDirection(localVel); //로컬 좌표계를 월드 좌표계 속도로 바꿈
 
         StartCoroutine(TemporaryStabilize());
@@ -536,10 +617,10 @@ public class AICarController : MonoBehaviour
         carRB.drag = originalDrag;
         carRB.angularDrag = originalAngularDrag;
     }
-        
+
     void CheckForStuck()
     {
-        if(isFinished) return;
+        if (isFinished) return;
         // 차량이 움직이는지 확인
         if (Vector3.Distance(transform.position, lastPosition) < 0.1f)
         {
@@ -567,39 +648,50 @@ public class AICarController : MonoBehaviour
             StartCoroutine(RespawnToNearestWaypoint());
         }
     }
-   
+
     // 복구 루틴 코루틴: 웨이포인트 기준 리스폰
     IEnumerator RespawnToNearestWaypoint()
     {
-        isRecovering = true;              
+        isRecovering = true;
 
-        Transform nearest = null;
+        int nearest = -1;
         float minDist = Mathf.Infinity;
         for (int i = 0; i < WaypointTest.Count; i++) //가까운 웨이포인트 탐색
         {
-           float dot = Vector3.Dot(transform.forward, (WaypointTest.GetWaypoint(i).position - transform.position).normalized);
+            float dot = Vector3.Dot(transform.forward, (WaypointTest.GetWaypoint(i).position - transform.position).normalized);
             float dist = Vector3.Distance(transform.position, WaypointTest.GetWaypoint(i).position);
-            
+
             if (dist < minDist && dot > 0f)
             {
                 minDist = dist;
-                nearest = WaypointTest.GetWaypoint(i);
-                currentWaypointIndex = i;
+                nearest = i;
             }
         }
 
-        if (nearest != null)
+        if (nearest != -1)
         {
-            transform.position = nearest.position + Vector3.up * 1f; //리스폰 지점
-            transform.rotation = Quaternion.LookRotation(nearest.forward);
+            //이전 웨이포인트 인덱스
+            int beforeWpIndex = nearest - 1;
+
+            if (beforeWpIndex < 0)
+            {
+                beforeWpIndex = WaypointTest.Count - 1;
+            }
+
+            Transform respawnWP = WaypointTest.GetWaypoint(beforeWpIndex);
+
+            transform.position = respawnWP.position + Vector3.up * 1f; //리스폰 지점
+            transform.rotation = Quaternion.LookRotation(respawnWP.forward);
             carRB.velocity = Vector3.zero;
-            carRB.angularVelocity = Vector3.zero;           
+            carRB.angularVelocity = Vector3.zero;
+
+            currentWaypointIndex = beforeWpIndex; //현재 웨이포인트 갱신
         }
-               
+
         yield return new WaitForSeconds(recoveryTime);
         isRecovering = false;
-        
-        
+
+
     }
 
     public IEnumerator SmoothStop(float duration = 1.5f)
