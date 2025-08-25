@@ -34,10 +34,11 @@ public class EndTrigger : MonoBehaviour
     if (!ri.finished)
     {
       ri.finished = true;
-      ri.finishOrder = ++RaceManager.Instance.finishCounter;
+      if(RaceDataStore.Instance != null)
+        ri.finishOrder = ++RaceManager.Instance.finishCounter;
     }
 
-    if (ri.isPlayer && TimeManager.Instance != null && !recorded.Contains(ri))
+    if (TimeManager.Instance != null && !recorded.Contains(ri))
     {
       TimeManager.Instance.RecordFinishTime(ri, TimeManager.Instance.RaceDuration);
       recorded.Add(ri);

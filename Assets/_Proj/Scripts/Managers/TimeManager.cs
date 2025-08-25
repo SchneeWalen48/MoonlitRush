@@ -15,9 +15,10 @@ public class TimeManager : MonoBehaviour
         public string playerName;
         public float finishTime;
         public bool finished = true;
+    public bool isPlayer;
     }
 
-    public List<PlayerTimeData> data = new List<PlayerTimeData>();
+    public readonly List<PlayerTimeData> data = new List<PlayerTimeData>();
     public List<PlayerTimeData> Results => GetRanking();
 
 
@@ -116,6 +117,7 @@ public class TimeManager : MonoBehaviour
 
     public void RecordFinishTime(string name, float fTime)
     {
+    
         string safe = string.IsNullOrWhiteSpace(name)
             ? PlayerPrefs.GetString("PlayerNickname", "Player")
             : name;
@@ -128,10 +130,21 @@ public class TimeManager : MonoBehaviour
 
     public void RecordFinishTime(RacerInfo ri, float fTime)
     {
-        string safe = (ri && !string.IsNullOrWhiteSpace(ri.displayName))
-            ? ri.displayName
-            : PlayerPrefs.GetString("PlayerNickname", "Player");
-        RecordFinishTime(safe, fTime);
+    if(ri == null) return;
+
+    string safeName =
+      !string.IsNullOrWhiteSpace(ri.displayName) ? ri.displayName :
+      !string.IsNullOrWhiteSpace(ri.racerName) ? ri.racerName :
+      PlayerPrefs.GetString("PlayerNickname", "Player");
+       
+    if (data.Exists(x => x.playerName == safeName)) return;
+
+    data.Add(new PlayerTimeData
+    {
+      playerName = safeName,
+      finishTime = fTime,
+      isPlayer = ri.isPlayer
+    });
     }
 
     //public void TrySetWinnerPrefab(RacerInfo ri)
@@ -142,7 +155,8 @@ public class TimeManager : MonoBehaviour
 
     public List<PlayerTimeData> GetRanking()
     {
-        return data.OrderBy(p => p.finishTime).ToList(); // Sort racing records by fastest time
+    return new List<PlayerTimeData>(data);
+    //return data.OrderBy(p => p.finishTime).ToList(); // Sort racing records by fastest time
     }
 
 }
