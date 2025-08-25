@@ -91,6 +91,7 @@ public class TimeManager : MonoBehaviour
     // Returns elapsed time as a string (minutes:seconds.milliseconds)
     public static string FormatTime(float t)
     {
+    if (t < 0 || float.IsNaN(t) || float.IsInfinity(t)) return "--";
         int m = Mathf.FloorToInt(t / 60f);
         float s = t % 60f;
         return $"{m:00}:{s:00.000}";
@@ -143,17 +144,51 @@ public class TimeManager : MonoBehaviour
     {
       playerName = safeName,
       finishTime = fTime,
-      isPlayer = ri.isPlayer
+      isPlayer = ri.isPlayer,
+      finished = (fTime >= 0f)
     });
     }
+  public void EnsureDNFsFrom(List<RacerInfo> racers)
+  {
+    if (racers == null) return;
 
-    //public void TrySetWinnerPrefab(RacerInfo ri)
-    //{
-    //    if (!winnerPodiumPrefab && ri && ri.podiumDisplayPrefab)
-    //        winnerPodiumPrefab = ri.podiumDisplayPrefab;
-    //}
+    foreach (var r in racers)
+    {
+      if (!r) continue;
 
-    public List<PlayerTimeData> GetRanking()
+      string safeName =
+          !string.IsNullOrWhiteSpace(r.displayName) ? r.displayName :
+          !string.IsNullOrWhiteSpace(r.racerName) ? r.racerName :
+          PlayerPrefs.GetString("PlayerNickname", "Player");
+
+      // 이미 기록된(완주한) 이름은 스킵
+      if (data.Any(d => d.playerName == safeName)) continue;
+
+      // DNF 추가
+      data.Add(new PlayerTimeData
+      {
+        playerName = safeName,
+        finishTime = -1f,
+        finished = false,
+        isPlayer = r.isPlayer
+      });
+    }
+  }
+
+  // 편의: UI에서 "--" 찍기 쉽게
+  public static string FormatOrDash(PlayerTimeData p)
+  {
+    return (p != null && p.finished && p.finishTime >= 0f)
+        ? FormatTime(p.finishTime)
+        : "--";
+  }
+  //public void TrySetWinnerPrefab(RacerInfo ri)
+  //{
+  //    if (!winnerPodiumPrefab && ri && ri.podiumDisplayPrefab)
+  //        winnerPodiumPrefab = ri.podiumDisplayPrefab;
+  //}
+
+  public List<PlayerTimeData> GetRanking()
     {
     return new List<PlayerTimeData>(data);
     //return data.OrderBy(p => p.finishTime).ToList(); // Sort racing records by fastest time

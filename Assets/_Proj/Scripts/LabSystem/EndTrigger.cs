@@ -34,7 +34,7 @@ public class EndTrigger : MonoBehaviour
     if (!ri.finished)
     {
       ri.finished = true;
-      if(RaceDataStore.Instance != null)
+      //if(RaceDataStore.Instance != null)
         ri.finishOrder = ++RaceManager.Instance.finishCounter;
     }
 

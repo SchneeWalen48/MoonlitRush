@@ -1,4 +1,7 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -64,18 +67,18 @@ public class FinalCount : MonoBehaviour
         }
         yield return new WaitForSecondsRealtime(Mathf.Max(0.2f, othersSlowDuration * 0.6f));
 
-        TimeManager.Instance?.StopTimer();
-    if (TimeManager.Instance != null)
-    {
-      RaceDataStore.RankingData = TimeManager.Instance.GetRanking();
-    }
-    else
-    {
-      Debug.LogWarning("TimeManager 인스턴스를 찾을 수 없어 랭킹을 저장할 수 없습니다.");
-    }
+    //    TimeManager.Instance?.StopTimer();
+    //if (TimeManager.Instance != null)
+    //{
+    //  RaceDataStore.RankingData = TimeManager.Instance.GetRanking();
+    //}
+    //else
+    //{
+    //  Debug.LogWarning("TimeManager 인스턴스를 찾을 수 없어 랭킹을 저장할 수 없습니다.");
+    //}
 
-    if (endFade) yield return FadeTo(endFade, 1f, endFadeDuration);
-
+    //if (endFade) yield return FadeTo(endFade, 1f, endFadeDuration);
+    OnFinalCountdownDone();
         LoadEndingSceneSafe();
     }
 
@@ -126,11 +129,92 @@ public class FinalCount : MonoBehaviour
         }
         cg.alpha = target;
     }
+  void OnFinalCountdownDone()
+  {
+    var rm = RaceManager.Instance;
+    var tm = TimeManager.Instance;
 
-    void LoadEndingSceneSafe()
+    if (tm != null && rm != null)
+    {
+      // 1) DNF 채우기
+      tm.EnsureDNFsFrom(rm.racers);
+
+      // 2) 최종 순위 생성 (완주자 → 미완주자)
+      var final = BuildFinalResults(rm.racers, tm);
+
+      // 3) 엔딩에 넘길 데이터 확정
+      RaceDataStore.RankingData = final;
+
+      // 4) 최종적으로 타이머 정지
+      tm.StopTimer();
+    }
+  }
+  void LoadEndingSceneSafe()
     {
         var name = string.IsNullOrWhiteSpace(endingSceneName) ? "Ending" : endingSceneName;
         if (SceneManagers.Instance) SceneManagers.LoadScene(name);
         else SceneManager.LoadScene(name);
     }
+  static string NameOf(RacerInfo r)
+  {
+    if (!r) return "Unknown";
+    if (!string.IsNullOrWhiteSpace(r.displayName)) return r.displayName;
+    if (!string.IsNullOrWhiteSpace(r.racerName)) return r.racerName;
+    return PlayerPrefs.GetString("PlayerNickname", "Player");
+  }
+  static float DistToNext(RacerInfo r)
+  {
+    var lc = r?.lapCounter;
+    if (lc?.nextCheckpoint == null) return float.MaxValue;
+    return Vector3.Distance(r.transform.position, lc.nextCheckpoint.transform.position);
+  }
+
+  static List<TimeManager.PlayerTimeData> BuildFinalResults(List<RacerInfo> racers, TimeManager tm)
+  {
+    var dict = tm.data.ToDictionary(x => x.playerName, x => x);
+
+    // 1) 완주자: finishOrder 순으로 고정
+    var finished = racers
+        .Where(r => r && r.finished)
+        .OrderBy(r => r.finishOrder)
+        .Select(r =>
+        {
+          var name = NameOf(r);
+          if (!dict.TryGetValue(name, out var p))
+          {
+            p = new TimeManager.PlayerTimeData
+            {
+              playerName = name,
+              finishTime = tm.RaceDuration,
+              finished = true,
+              isPlayer = r.isPlayer
+            };
+          }
+          return p;
+        });
+
+    // 2) 미완주자: 진행도(랩↓, 체크포인트 인덱스↓, 다음 체크포인트까지 거리↑)
+    var notFinished = racers
+        .Where(r => r && !r.finished && r.lapCounter && r.lapCounter.checkpointManager)
+        .OrderByDescending(r => r.lapCounter.currentLap)
+        .ThenByDescending(r => r.lapCounter.nextCheckpoint ? r.lapCounter.nextCheckpoint.checkpointId : 0)
+        .ThenBy(r => DistToNext(r))
+        .Select(r =>
+        {
+          var name = NameOf(r);
+          if (!dict.TryGetValue(name, out var p))
+          {
+            p = new TimeManager.PlayerTimeData
+            {
+              playerName = name,
+              finishTime = -1f, // DNF
+              finished = false,
+              isPlayer = r.isPlayer
+            };
+          }
+          return p;
+        });
+
+    return finished.Concat(notFinished).ToList();
+  }
 }
