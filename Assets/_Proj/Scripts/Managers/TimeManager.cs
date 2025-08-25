@@ -91,7 +91,7 @@ public class TimeManager : MonoBehaviour
     // Returns elapsed time as a string (minutes:seconds.milliseconds)
     public static string FormatTime(float t)
     {
-    if (t < 0 || float.IsNaN(t) || float.IsInfinity(t)) return "--";
+    if (t < 0 || float.IsNaN(t) || float.IsInfinity(t)) return "Time Over";
         int m = Mathf.FloorToInt(t / 60f);
         float s = t % 60f;
         return $"{m:00}:{s:00.000}";
