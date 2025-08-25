@@ -45,6 +45,9 @@ public class SceneBinder : MonoBehaviour
     {
       vcam.Follow = car.transform;
       vcam.LookAt = car.transform.childCount > 0 ? car.transform.GetChild(0) : car.transform;
+      //SnapVcamBehind(car.transform, dist: 7f, height: 2.2f);
+      vcam.PreviousStateIsValid = false;
+      SnapBehind(vcam, car.transform, dist: 4.5f, height: 1.8f, side: 0.0f, fov: 55f);
     }
 
     // --- Getting automotive components (루트 우선, 없으면 자식까지) ---
@@ -86,6 +89,51 @@ public class SceneBinder : MonoBehaviour
       pMinimapIcon.target = car.transform;
 
     //Debug.Log("[SceneAutoWire] Wiring complete.");
+  }
+
+  static void SnapBehind(CinemachineVirtualCamera cam, Transform target,
+                       float dist, float height, float side, float fov)
+  {
+    // Default offset settings by body type
+    var tFollow = cam.GetCinemachineComponent<CinemachineTransposer>();
+    if (tFollow)
+    {
+      // Follow Offset is local (relative to target): (x=left/right, y=height, z=back)
+      tFollow.m_FollowOffset = new Vector3(side, height, -dist);
+      tFollow.m_XDamping = tFollow.m_YDamping = tFollow.m_ZDamping = 0f; // 첫 프레임 스냅
+    }
+
+    var third = cam.GetCinemachineComponent<Cinemachine3rdPersonFollow>();
+    if (third)
+    {
+      third.CameraDistance = dist;
+      third.CameraSide = side;     // -1 왼쪽 ~ +1 오른쪽 (0이면 정가운데)
+      third.ShoulderOffset.y = height;
+      third.Damping = Vector3.zero; // First frame snap
+    }
+
+    // Physical location is also enforced immediately
+    var camPos = target.position - target.forward * dist + Vector3.up * height + target.right * side;
+    var lookPos = target.position + target.forward * 5f;
+    cam.ForceCameraPosition(camPos, Quaternion.LookRotation(lookPos - camPos, Vector3.up));
+
+    // 보기 좋게 FOV 조정
+    var lens = cam.m_Lens;
+    lens.FieldOfView = fov;
+    cam.m_Lens = lens;
+
+    // Restore original damping from next frame (Transposer/3rdPersonFollow 쓰는 경우)
+    RestoreDampingNextFrame(cam);
+  }
+
+  static async void RestoreDampingNextFrame(CinemachineVirtualCamera cam)
+  {
+    await System.Threading.Tasks.Task.Yield();
+    var t = cam.GetCinemachineComponent<CinemachineTransposer>();
+    if (t) { t.m_XDamping = 0.5f; t.m_YDamping = 0.8f; t.m_ZDamping = 0.6f; }
+
+    var third = cam.GetCinemachineComponent<Cinemachine3rdPersonFollow>();
+    if (third) third.Damping = new Vector3(0.5f, 0.8f, 0.6f);
   }
 
   // ---- First try with field name (multiple candidates), if that fails, match with type ----

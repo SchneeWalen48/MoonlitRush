@@ -94,7 +94,7 @@ public class AICarController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // if (moveStart == false) return;
+        if(isFinished) return;
 
         if (WaypointTest == null || WaypointTest.Count == 0) return;
 
