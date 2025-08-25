@@ -59,6 +59,7 @@ public class FinalCount : MonoBehaviour
     if (finalCountText) finalCountText.text = "Finish!";
     yield return new WaitForSecondsRealtime(1f);
 
+    if (endFade) StartCoroutine(FadeTo(endFade, 0f, 0.25f));
     var everyone = FindObjectsOfType<RacerInfo>(true);
     foreach (var r in everyone)
     {
@@ -91,8 +92,8 @@ public class FinalCount : MonoBehaviour
     var car = tf.GetComponentInParent<CarController>() ?? tf.GetComponentInChildren<CarController>();
     var ai = tf.GetComponentInParent<AICarController>() ?? tf.GetComponentInChildren<AICarController>();
 
-    if (car) car.isFinished = true; car.moveInput = 0f;
-    if (ai) ai.isFinished = true; ai.moveInput = 0f;
+    if (car){ car.isFinished = true; car.moveInput = 0f;}
+    if (ai)  ai.isFinished = true; ai.moveInput = 0f; 
     
     // 시작값 캐시해서 매 프레임 부드럽게 Lerp
     float t = 0f;
