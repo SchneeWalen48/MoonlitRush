@@ -38,18 +38,18 @@ public class StartCount : MonoBehaviour
   }
   IEnumerator CountRoutine()
   {
-    mainSource.PlayOneShot(countClip);
-    mainSource.PlayOneShot(startClip);
     // 카운트 동안 시간 정지 + unscaled 대기
     Time.timeScale = 0f;
 
     for (int i = seconds; i > 0; i--)
     {
       if (startCountText) startCountText.text = i.ToString();
+      mainSource.PlayOneShot(countClip);
       yield return new WaitForSecondsRealtime(1f);
     }
 
     if (startCountText) startCountText.text = "GO!";
+    mainSource.PlayOneShot(startClip);
     yield return new WaitForSecondsRealtime(goHold);
 
     // 인트로가 있으면 인트로에게 해제/타이머 시작을 맡긴다
