@@ -7,9 +7,9 @@ public class TimeManager : MonoBehaviour
     // Singleton Instance : Accessible from anywhere
     public static TimeManager Instance;
 
-    [Header("Podium")]
-    public GameObject winnerPodiumPrefab;
-
+  //[Header("Podium")]
+  //public GameObject winnerPodiumPrefab;
+  private float playerFinishTime = 0f;
     public class PlayerTimeData
     {
         public string playerName;
@@ -42,7 +42,6 @@ public class TimeManager : MonoBehaviour
         }
 
         Instance = this;
-        DontDestroyOnLoad(gameObject); // Maintained even where other scenes (Timer Data)
     }
 
     void Start()
@@ -69,6 +68,7 @@ public class TimeManager : MonoBehaviour
         if (isPaused) ResumeTimer();
         raceEndTime = Time.time;
         isTiming = false;
+    playerFinishTime = RaceDuration;
     }
 
     // Pause: Saves the current time and sets it to stopped state
@@ -95,7 +95,12 @@ public class TimeManager : MonoBehaviour
         return $"{m:00}:{s:00.000}";
     }
 
-    public string GetFormatRaceTime() => FormatTime(RaceDuration);
+    public string GetFormatRaceTime()
+  {
+    if (isTiming) return FormatTime(RaceDuration);
+    else return FormatTime(playerFinishTime);
+
+  } 
 
     // Reset Timer
     public void ResetTimer()
@@ -106,7 +111,7 @@ public class TimeManager : MonoBehaviour
         isPaused = false;
         pausedTime = 0f;
         totalPausedDuration = 0f;
-        winnerPodiumPrefab = null;
+        //winnerPodiumPrefab = null;
     }
 
     public void RecordFinishTime(string name, float fTime)
@@ -129,11 +134,11 @@ public class TimeManager : MonoBehaviour
         RecordFinishTime(safe, fTime);
     }
 
-    public void TrySetWinnerPrefab(RacerInfo ri)
-    {
-        if (!winnerPodiumPrefab && ri && ri.podiumDisplayPrefab)
-            winnerPodiumPrefab = ri.podiumDisplayPrefab;
-    }
+    //public void TrySetWinnerPrefab(RacerInfo ri)
+    //{
+    //    if (!winnerPodiumPrefab && ri && ri.podiumDisplayPrefab)
+    //        winnerPodiumPrefab = ri.podiumDisplayPrefab;
+    //}
 
     public List<PlayerTimeData> GetRanking()
     {
