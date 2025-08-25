@@ -1,4 +1,3 @@
-
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
@@ -62,8 +61,8 @@ public class AICarController : MonoBehaviour
     private float currDragCoefficient;
 
     [Header("Recovery Settings")]
-    [SerializeField] private float stuckTimeThreshold = 5f; // 멈췄다고 판단하는 시간 (초)
-    [SerializeField] private float recoveryTime = 3f;      // 복구 후 다시 움직이는 딜레이
+    [SerializeField] private float stuckTimeThreshold = 3f; // 멈췄다고 판단하는 시간 (초)
+    [SerializeField] private float recoveryTime = 2f;      // 복구 후 다시 움직이는 딜레이
     [SerializeField] private float rotationResetSpeed = 1f; // 회전 복구 속도
 
     [Header("SpeedBoostPad")]
@@ -159,7 +158,7 @@ public class AICarController : MonoBehaviour
         Vector3 toCar = (target - transform.position).normalized;
         float angleToNext = Vector3.Angle(transform.forward, toCar);
 
-     //   Debug.Log($"Current Angle: {angleToNext}, Current Speed: {currentSpeed}"); //콘솔에 이상한 값이 찍힘 그렇담 드리프트 로직이 문제란 소리...., 픽시드 업데이트에서 디버그 찍는 중이라 계속 나오는 게 당연
+        Debug.Log($"Current Angle: {angleToNext}, Current Speed: {currentSpeed}"); //콘솔에 이상한 값이 찍힘 그렇담 드리프트 로직이 문제란 소리...., 픽시드 업데이트에서 디버그 찍는 중이라 계속 나오는 게 당연
 
         currentSpeed = carRB.velocity.magnitude;
 
@@ -168,9 +167,9 @@ public class AICarController : MonoBehaviour
         {
             isDrifting = true;
 
-          //  Debug.Log($"Drifting started! Angle: {angleToNext}, Speed: {currentSpeed}"); //이게 연속으로 나오면 문제있음
+            Debug.Log($"Drifting started! Angle: {angleToNext}, Speed: {currentSpeed}"); //이게 연속으로 나오면 문제있음
         }
-        else if (angleToNext < 13f && isDrifting && Mathf.Abs(carLocalVelocity.x) < 2f)
+        else if (angleToNext < 15f && isDrifting && Mathf.Abs(carLocalVelocity.x) < 2f)
         { //직선 구간
             isDrifting = false;
 
@@ -181,7 +180,9 @@ public class AICarController : MonoBehaviour
         {
             // 드리프트 중에는 조향 강도를 높임            
             steerInput = Mathf.Clamp(localTarget.x / localTarget.magnitude, -1f, 1f) * 3.5f;
-            moveInput = 0.8f;
+            moveInput = 0.5f;
+
+
         }
         else // 드리프트 중이 아닐 때, 일반 주행 로직을 실행
         {
@@ -345,7 +346,8 @@ public class AICarController : MonoBehaviour
             Air();
         }
         else if (isGrounded)
-        {           
+        {
+            Debug.Log("공중 제어 X, 일반 주행 시작");
             Accelerate();
             Decelerate();
             Turn();
@@ -397,7 +399,8 @@ public class AICarController : MonoBehaviour
         }
 
         void Air()
-        {          
+        {
+            Debug.Log("공중 제어");
             steerInput = 0;
             moveInput = 0;
             carRB.angularVelocity *= 0.9f;
@@ -454,13 +457,15 @@ public class AICarController : MonoBehaviour
         {
             if (isFinished) return;
 
-            StartCoroutine(SmoothStop(2f));
+            StartCoroutine(SmoothStop(2f));           
             Debug.Log("완주!");
         }
     }
 
     IEnumerator BoostRoutine(float force, float duration)
     {
+        Debug.Log("AI 부스트 패드 코루틴 시작");
+
         // 초기 속도 강제 설정
         Vector3 localVelocity = transform.InverseTransformDirection(carRB.velocity);
         localVelocity.z = Mathf.Max(localVelocity.z, force);
@@ -543,18 +548,23 @@ public class AICarController : MonoBehaviour
         Vector3 finalLv = transform.InverseTransformDirection(carRB.velocity);
         finalLv.z = Mathf.Min(finalLv.z, targetSpeed);
         carRB.velocity = transform.TransformDirection(finalLv);
-               
+
+        Debug.Log("AI 부스트 패드 코루틴 끝");           
+
         isBoosted = false;
     }
 
     IEnumerator SpeedUpRoutine(float force, float duration)
-    {       
+    {
+        Debug.Log("AI 슬로프 시작");
         Vector3 localVelocity = carRB.transform.InverseTransformDirection(carRB.velocity);
         localVelocity.z = Mathf.Max(localVelocity.z, force);
         carRB.velocity = transform.TransformDirection(localVelocity);
 
         yield return new WaitForSeconds(duration);
-        
+
+        Debug.Log("AI 슬로프 종료");
+
         isSpeedUp = false;
     }
 
@@ -574,16 +584,11 @@ public class AICarController : MonoBehaviour
 
     private void OnCollisionEnter(Collision other)
     {
-        if (!isInvincible)
+        //플레이어와 충돌 순간 반응
+        if (other.collider.CompareTag("Player"))
         {
             StabilizeAfterHit();
         }
-
-        //플레이어와 충돌 순간 반응
-        //if (other.collider.CompareTag("Player"))
-        //{
-        //    StabilizeAfterHit();
-        //}
     }
 
     void StabilizeAfterHit()
@@ -595,7 +600,7 @@ public class AICarController : MonoBehaviour
         localVel.z = Mathf.Max(localVel.z, 5f); // 최소 전진 속도 추가
         carRB.velocity = transform.TransformDirection(localVel); //로컬 좌표계를 월드 좌표계 속도로 바꿈
 
-        // StartCoroutine(TemporaryStabilize());
+        StartCoroutine(TemporaryStabilize());
     }
 
     //일시적 안정화 코루틴

@@ -330,10 +330,10 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 266648468}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 889, y: 833, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1079678558}
   m_Father: {fileID: 0}
@@ -544,7 +544,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 349619573}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 79401fb3946a0fe42a8155f4801f8f36, type: 3}
+  m_Script: {fileID: 11500000, guid: a2d5e56e541c6624fb2b5c3407711a0e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   rankingUI: {fileID: 2079024236}
@@ -552,7 +552,7 @@ MonoBehaviour:
   toLobbyButton: {fileID: 176842847}
   lobbySceneName: Lobby
   quitButton: {fileID: 457870585}
-  showDelay: 0.6
+  showDelay: 0.5
 --- !u!4 &349619575
 Transform:
   m_ObjectHideFlags: 0
@@ -1047,50 +1047,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 539962505}
   m_CullTransparentMesh: 1
---- !u!1 &550646014
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 550646016}
-  - component: {fileID: 550646015}
-  m_Layer: 0
-  m_Name: EndingScene
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &550646015
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 550646014}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cf118ad1f77ad64468f4d9d8adb80c6b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!4 &550646016
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 550646014}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -30.488115, y: 8.72, z: 120.44811}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &754503629
 GameObject:
   m_ObjectHideFlags: 0
@@ -1328,13 +1284,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1079678557}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 440, y: 440, z: 0}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: -400, y: -200, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 266648469}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!1 &1096665970
 GameObject:
   m_ObjectHideFlags: 0
@@ -1746,8 +1702,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4278190080
+  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -1913,9 +1869,9 @@ RectTransform:
   - {fileID: 1096665971}
   - {fileID: 771172393}
   - {fileID: 1401186202}
+  - {fileID: 136592139}
   - {fileID: 539962506}
   - {fileID: 283367244}
-  - {fileID: 136592139}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2268,8 +2224,7 @@ SceneRoots:
   m_Roots:
   - {fileID: 754503632}
   - {fileID: 2143557803}
-  - {fileID: 1565041213}
   - {fileID: 266648469}
+  - {fileID: 1565041213}
   - {fileID: 349619575}
   - {fileID: 1886847132}
-  - {fileID: 550646016}
