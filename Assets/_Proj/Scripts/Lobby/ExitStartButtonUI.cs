@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
+﻿using UnityEngine;
 
 public class ExitStartButtonUI : MonoBehaviour
 {
@@ -24,7 +20,7 @@ public class ExitStartButtonUI : MonoBehaviour
 
     public void GameExit()
     {
-        Debug.Log("게임 종료 요청");        
+        //Debug.Log("게임 종료 요청");        
         Application.Quit();
     }
 
@@ -43,13 +39,13 @@ public class ExitStartButtonUI : MonoBehaviour
     {
         // 선택 정보 저장
         carSelectionUI.SaveSelection();
-    UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene");
+    UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
     }
 
     //결과창에서 재시작
     public void ReGameStart()
     {
-    UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene");
+    UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
     }
         
     public void Lobby() //로비로 가기 및 돌아가기

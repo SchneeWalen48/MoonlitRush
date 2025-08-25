@@ -1,11 +1,11 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
 
 public class RaceRankUI : MonoBehaviour
 {
     [Header("UI References")]
-    public List<TextMeshProUGUI> nameTexts; // ÀÌ¹Ì ¹èÄ¡µÈ TextMeshProUGUI ¸®½ºÆ®
+    public List<TextMeshProUGUI> nameTexts; // ì´ë¯¸ ë°°ì¹˜ëœ TextMeshProUGUI ë¦¬ìŠ¤íŠ¸
     public List<TextMeshProUGUI> rankTexts;
 
     void Update()
@@ -16,13 +16,13 @@ public class RaceRankUI : MonoBehaviour
         {
             if (i < racers.Count)
             {
-                // ¼øÀ§¿Í ÀÌ¸§ ¾÷µ¥ÀÌÆ®
+                // ìˆœìœ„ì™€ ì´ë¦„ ì—…ë°ì´íŠ¸
                 rankTexts[i].text = $"{racers[i].currentRank}";
                 rankTexts[i].gameObject.SetActive(true);
             }
             else
             {
-                // ³²Àº ÅØ½ºÆ®´Â ºñÈ°¼ºÈ­
+                // ë‚¨ì€ í…ìŠ¤íŠ¸ëŠ” ë¹„í™œì„±í™”
                 rankTexts[i].gameObject.SetActive(false);
             }
         }
@@ -31,15 +31,16 @@ public class RaceRankUI : MonoBehaviour
         {
             if (i < racers.Count)
             {
-                // ¼øÀ§¿Í ÀÌ¸§ ¾÷µ¥ÀÌÆ®
+                // ìˆœìœ„ì™€ ì´ë¦„ ì—…ë°ì´íŠ¸
                 nameTexts[i].text = $"{racers[i].racerName}";
                 nameTexts[i].gameObject.SetActive(true);
             }
             else
             {
-                // ³²Àº ÅØ½ºÆ®´Â ºñÈ°¼ºÈ­
+                // ë‚¨ì€ í…ìŠ¤íŠ¸ëŠ” ë¹„í™œì„±í™”
                 nameTexts[i].gameObject.SetActive(false);
             }
+
         }
 
 

@@ -3,21 +3,15 @@ using UnityEngine;
 
 public class RankingPrefab : MonoBehaviour
 {
-  public TextMeshProUGUI rankTxt;
-  public TextMeshProUGUI nameTxt;
-  public TextMeshProUGUI timeTxt;
+    public TMP_Text rankText;
+    public TMP_Text nameText;
+    public TMP_Text timeText;
 
-  public void SetUI(int rank, string pName, float time)
-  {
-    rankTxt.text = $"{rank}.";
-    nameTxt.text = pName;
-    timeTxt.text = FormatTime(time);
-  }
+    public void Set(int rank, string name, string time)
+    {
+        rankText.text = rank.ToString();
+        nameText.text = name;
+        timeText.text = time;
+    }
 
-  string FormatTime(float time)
-  {
-    int minutes = Mathf.FloorToInt(time / 60);
-    float seconds = time % 60;
-    return $"{minutes:00}:{seconds:00.00}";
-  }
 }

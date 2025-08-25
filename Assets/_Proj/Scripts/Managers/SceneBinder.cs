@@ -69,8 +69,8 @@ public class SceneBinder : MonoBehaviour
     // Canvas ItemSlot.useItem ← car.UseItem
     AssignByNameThenType(canvasItemSlots, new[] { "useItem", "UseItem" }, useItem);
 
-    if (finalCnt && carCtrl) finalCnt.playerCar = carCtrl;
-    if (startCnt && carCtrl) startCnt.playerCar = carCtrl;
+    //if (finalCnt && carCtrl) finalCnt.playerCar = carCtrl;
+    //if (startCnt && carCtrl) startCnt.playerCar = carCtrl;
     var lapCounter = car.GetComponent<LapCounter>() ?? car.GetComponentInChildren<LapCounter>();
     if (!lapCntText)
       lapCntText = GameObject.Find("Lap Text")?.GetComponent<TextMeshProUGUI>();
@@ -85,7 +85,7 @@ public class SceneBinder : MonoBehaviour
     if (pMinimapIcon)
       pMinimapIcon.target = car.transform;
 
-    Debug.Log("[SceneAutoWire] Wiring complete.");
+    //Debug.Log("[SceneAutoWire] Wiring complete.");
   }
 
   // ---- First try with field name (multiple candidates), if that fails, match with type ----

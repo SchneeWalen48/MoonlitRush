@@ -1,59 +1,52 @@
-﻿using System.Runtime.InteropServices.WindowsRuntime;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class EndTrigger : MonoBehaviour
 {
-    private BoxCollider collider;
-  private FinalCount final; // 완주 시 게임 종료 알리는 카운트 스크립트
-  private bool isFinished = false;
+    BoxCollider col;
+    FinalCount final;
+    bool finalStarted = false;
 
-    private void Awake()
+  readonly HashSet<RacerInfo> recorded = new HashSet<RacerInfo>();
+    void Awake() => col = GetComponent<BoxCollider>();
+
+    void Start()
     {
-        collider = GetComponent<BoxCollider>();
+        final = FindObjectOfType<FinalCount>();
+        if (col) col.enabled = false;
     }
 
-    private void Start()
+    public void ActiveTrigger()
     {
-    final = FindAnyObjectByType<FinalCount>();
-        if(collider != null)
-        {
-            collider.enabled = false;
-        }        
+        if (!col) return;
+        col.enabled = true;
+        col.isTrigger = true;
     }
 
-   public void ActiveTrigger()
-    {
-        if (collider != null)
-        {
-            collider.enabled = true;
-            Debug.Log("EndTrigger 활성화");
-        }
-    }
   void OnTriggerEnter(Collider other)
   {
-    if (!isFinished) return;
-    else if (!isFinished)
+    var ri = other.GetComponentInParent<RacerInfo>() ?? other.GetComponent<RacerInfo>();
+    if (!ri || !ri.lapCounter) return;
+
+    int total = RaceManager.Instance ? RaceManager.Instance.totalLaps : 2;
+    if (ri.lapCounter.currentLap < total) return;
+
+    if (!ri.finished)
     {
-      isFinished = true;
-      Rigidbody rb = other.GetComponent<Rigidbody>();
-      rb.drag = 20;
-      rb.angularDrag = 20;
-      rb.isKinematic = true;
-
-      if (other.CompareTag("Player"))
-      {
-        CarController p = other.GetComponent<CarController>();
-        p.moveInput = 0f;
-        p.steerInput = 0f;
-      }
-      else if (other.CompareTag("AIPlayer"))
-      {
-        AICarController ai = other.GetComponent<AICarController>();
-        ai.moveInput = 0f;
-        ai.steerInput = 0f;
-      }
+      ri.finished = true;
+      //if(RaceDataStore.Instance != null)
+        ri.finishOrder = ++RaceManager.Instance.finishCounter;
     }
-    final.Finish();
-  }
 
+    if (TimeManager.Instance != null && !recorded.Contains(ri))
+    {
+      TimeManager.Instance.RecordFinishTime(ri, TimeManager.Instance.RaceDuration);
+      recorded.Add(ri);
+    }
+    if (!finalStarted)
+    {
+      finalStarted = true;
+      final?.StartCountdown(final.defaultSeconds, ri);
+    }
+  }
 }

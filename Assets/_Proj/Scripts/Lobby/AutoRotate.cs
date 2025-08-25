@@ -1,8 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+ï»¿using UnityEngine;
 
-//·Îºñ¿¡¼­ ÇÃ·¹ÀÌ¾î Â÷·® È¸Àü
+//ë¡œë¹„ì—ì„œ í”Œë ˆì´ì–´ ì°¨ëŸ‰ íšŒì „
 public class AutoRotate : MonoBehaviour
 {
     public float rotationSpeed = 20;

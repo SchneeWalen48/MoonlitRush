@@ -11,7 +11,6 @@ public class SceneManagers : MonoBehaviour
     if(Instance == null)
     {
       Instance = this;
-      DontDestroyOnLoad(gameObject); // Maintain when changing scenes
     }
     else
     {
@@ -20,7 +19,7 @@ public class SceneManagers : MonoBehaviour
   }
 
   // Load by scene name
-  public void LoadScene(string sceneName)
+  public static void LoadScene(string sceneName)
   {
     if(!string.IsNullOrEmpty(sceneName))
       SceneManager.LoadScene(sceneName);

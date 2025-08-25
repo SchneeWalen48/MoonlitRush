@@ -12,6 +12,8 @@ TagManager:
   - ItemShield
   - AIPlayer
   - CheckPoint
+  - Goal
+  - Wall
   layers:
   - Default
   - TransparentFX

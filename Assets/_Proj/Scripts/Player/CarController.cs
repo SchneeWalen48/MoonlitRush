@@ -32,6 +32,7 @@ public class CarController : MonoBehaviour
 
   int[] wheelIsGrounded = new int[4];
   bool isGrounded = false;
+  public bool isFinished;
   public bool isInvincible { get; set; }
 
   [Header("Reverse")]
@@ -150,6 +151,7 @@ public class CarController : MonoBehaviour
 
   void Update()
   {
+    if(isFinished) return;
     GetPlayerInput();
     currSpeed = rb.velocity.magnitude;
     EngineSound();
@@ -157,11 +159,11 @@ public class CarController : MonoBehaviour
 
   void FixedUpdate()
   {
-    if (Time.frameCount % 60 == 0)
-    {
-      Debug.Log($"[{name}] lv.z={currCarLocalVel.z:F2}, gear={currGear}, " +
-                $"Accel={acceleration}, RL={tires[2].name}, RR={tires[3].name}");
-    }
+    //if (Time.frameCount % 60 == 0)
+    //{
+    //  Debug.Log($"[{name}] lv.z={currCarLocalVel.z:F2}, gear={currGear}, " +
+    //            $"Accel={acceleration}, RL={tires[2].name}, RR={tires[3].name}");
+    //}
     Suspension();
     GroundCheck();
 
@@ -679,14 +681,14 @@ public class CarController : MonoBehaviour
         rb.AddForceAtPosition(netForce * rayPoints[i].up, rayPoints[i].position);
 
         SetTirePosition(tires[i], hit.point + rayPoints[i].up * wheelRadius / 2);
-        Debug.DrawLine(rayPoints[i].position, hit.point, Color.red);
+        //Debug.DrawLine(rayPoints[i].position, hit.point, Color.red);
       }
       else
       {
         wheelIsGrounded[i] = 0;
 
         SetTirePosition(tires[i], rayPoints[i].position - rayPoints[i].up * (restLen + springTravel) * 0.9f);
-        Debug.DrawLine(rayPoints[i].position, rayPoints[i].position + (wheelRadius + maxDistance) * -rayPoints[i].up, Color.green);
+        //Debug.DrawLine(rayPoints[i].position, rayPoints[i].position + (wheelRadius + maxDistance) * -rayPoints[i].up, Color.green);
       }
     }
   }
@@ -721,7 +723,7 @@ public class CarController : MonoBehaviour
     {
       if (other.CompareTag("SpeedUp"))
       {
-        Debug.Log($"감지 : {other.tag}");
+        //Debug.Log($"감지 : {other.tag}");
         if (boostApplyer != null)
         {
           boostApplyer.ApplyBoost(2f, 1.1f, 1.5f); // 시간, 크기, 속도
@@ -730,19 +732,19 @@ public class CarController : MonoBehaviour
         rb.AddForce(transform.forward * acceleration * 30f, ForceMode.Acceleration); // 슬로프 탈 때 속도 감속 강제 보정
 
         float targetBoostSpeed = maxSpeed * 1.25f; // 내 차 최고속도의 125%
-        ApplyTransientOverdrive(add: maxSpeed * 0.12f, minFwdIfLower: maxSpeed * 0.5f);
+        ApplyTransientOverdrive(add: maxSpeed * 0.15f, minFwdIfLower: maxSpeed * 0.5f);
       }
 
       if (other.CompareTag("Barrel"))
       {
-        Debug.Log($"감지 : {other.tag}");
+        //Debug.Log($"감지 : {other.tag}");
         if (!isBarrelRolling)
           StartCoroutine(BarrelRollCoroutine());
       }
 
       if (other.CompareTag("BoostPad"))
       {
-        Debug.Log($"감지 : {other.tag}");
+        //Debug.Log($"감지 : {other.tag}");
         if (boostApplyer != null)
         {
           boostApplyer.ApplyBoost(2f, 1.1f, 2f);
@@ -753,7 +755,39 @@ public class CarController : MonoBehaviour
           StartCoroutine(BoostPadCoroutine(targetBoostSpeed, 1.5f));
         }
       }
+      if (other.CompareTag("Goal"))
+      {
+        if (isFinished) return;
+
+        StartCoroutine(SmoothStop(2f));
+        FinalCount.Instance.Finish();
+      }
     }
+  }
+  public IEnumerator SmoothStop(float duration = 1.5f)
+  {
+    isFinished = true;
+
+    // 엑셀은 즉시 막고, 핸들은 계속 살아 있게 둠
+    moveInput = 0;
+
+    float timer = 0f;
+    Vector3 initVel = rb.velocity;
+    Vector3 initAngularVel = rb.angularVelocity;
+
+    while (timer < duration)
+    {
+      float t = timer / duration;
+
+      rb.velocity = Vector3.Lerp(initVel, Vector3.zero, t);
+      rb.angularVelocity = Vector3.Lerp(initAngularVel, Vector3.zero, t);
+
+      timer += Time.deltaTime;
+      yield return null;
+    }
+
+    rb.velocity = Vector3.zero;
+    rb.angularVelocity = Vector3.zero;
   }
   #endregion
 
@@ -819,4 +853,14 @@ public class CarController : MonoBehaviour
     moveInput = 1f;
   }
   #endregion
+
+  void OnCollisionEnter(Collision collision)
+  {
+    if (collision.gameObject.CompareTag("Wall"))
+    {
+      Rigidbody rb = GetComponent<Rigidbody>();
+      rb.velocity *= 0.5f;
+      rb.velocity = Vector3.Reflect(rb.velocity, collision.contacts[0].normal) * 0.3f;
+    }
+  }
 }

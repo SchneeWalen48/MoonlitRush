@@ -15,7 +15,7 @@ public class MissileItem : MonoBehaviour
     
     if (data.fxPrefab == null)
     {
-      Debug.LogError("fxPrefab비어있음");
+      //Debug.LogError("fxPrefab비어있음");
       return;
     }
 
@@ -26,7 +26,7 @@ public class MissileItem : MonoBehaviour
     if (trail != null) { trail.Clear(); }
 
     MissileProj proj = missile.GetComponent<MissileProj>();
-    Debug.Log("Proj?" + (proj!=null));
+    //Debug.Log("Proj?" + (proj!=null));
     //if(proj != null)
     //{
     //  proj.Init(data.power, data.duration, gameObject, data.fxPrefab);

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/_Proj/Scripts/LabSystem/RacerLapTracker.cs.meta
+guid: 52ae427bf4ed5284f9477b1e018622c3
+========
+guid: 39c956e64003309428d83821a8ea33ab
+>>>>>>>> 31946d3 (IntroCam / Lobby(Nickname)):Assets/_Proj/Scripts/Lobby/LobbyNicknamePanel.cs.meta
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.SceneManagement;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class StageSelectManager : MonoBehaviour
@@ -45,7 +42,7 @@ public class StageSelectManager : MonoBehaviour
 
         //선택된 스테이지 인덱스를 저장
         PlayerPrefs.SetInt("SelectedStage", selectedStageIndex);
-        Debug.Log("Selected Stage: " + (selectedStageIndex));
+        //Debug.Log("Selected Stage: " + (selectedStageIndex));
 
         //스테이지 선택 시 시작 버튼 활성화
         if (StartButton != null) {
@@ -60,11 +57,11 @@ public class StageSelectManager : MonoBehaviour
         if (selectedStageIndex != -1)
         {
       //선택된 스테이지 인덱스를 기반으로 scene 로드
-      UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene");
+      UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
         }
         else
         {
-            Debug.LogWarning("게임 시작 전 스테이지 선택 확인");
+            //Debug.LogWarning("게임 시작 전 스테이지 선택 확인");
         }
     }
 }

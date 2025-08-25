@@ -1,0 +1,19 @@
+﻿using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class ButtonActions : MonoBehaviour
+{
+    public void GoToLobby()
+    {
+        SceneManagers.LoadScene("Lobby");
+    }
+
+    public void QuitGame()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
+    }
+}

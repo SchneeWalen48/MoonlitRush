@@ -1,5 +1,7 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
+public enum Team { Player, AI }
 public class MissileProj : MonoBehaviour
 {
   private Rigidbody rb;
@@ -67,26 +69,59 @@ public class MissileProj : MonoBehaviour
   {
     if (rb == null) return;
 
-    Vector3 fwd = (rb.velocity.sqrMagnitude > 0.01f) ? rb.velocity.normalized : (launchFwd != Vector3.zero ? launchFwd : transform.forward);
+        //Debug.Log($"미사일 속도: {rb.velocity.magnitude}");
 
-    // 가장 가까운 ai 탐색
+        Vector3 fwd = (rb.velocity.sqrMagnitude > 0.01f) ? rb.velocity.normalized 
+      : (launchFwd != Vector3.zero ? launchFwd : transform.forward);
+
+    // 가장 가까운 대상 탐색
+    // 주체 Player => AI탐색
+    // 주체 AI => AI + Player 탐색
     if (target == null)
     {
-      GameObject[] aiPlayers = GameObject.FindGameObjectsWithTag("AIPlayer");
+      List<GameObject> racers = new List<GameObject>();
+
+      bool shooterIsPlayer = (me != null && me.CompareTag("Player"));
+      bool shooterIsAI = (me != null && me.CompareTag("AIPlayer"));
+
+      if (shooterIsPlayer)
+      {
+        racers.AddRange(GameObject.FindGameObjectsWithTag("AIPlayer"));
+      }
+      else if (shooterIsAI) {
+        var allAIs = GameObject.FindGameObjectsWithTag("AIPlayer");
+        foreach (var ai in allAIs)
+        {
+          if (me != null && ai == me || ai.transform.IsChildOf(me.transform)) continue; // 자신 제외
+          racers.Add(ai);
+        }
+
+        var playerGO = GameObject.FindGameObjectWithTag("Player");
+        if (playerGO != null) racers.Add(playerGO);
+      }
+      else
+      {
+        racers.AddRange(GameObject.FindGameObjectsWithTag("AIPlayer"));
+      }
       float minDist = float.MaxValue;
 
-      foreach (var hit in aiPlayers)
+      float cosFov = Mathf.Cos(75f * Mathf.Deg2Rad);
+
+      foreach (var racer in racers)
       {
-        float dist = Vector3.Distance(transform.position, hit.transform.position);
+        if(racer == null) continue;
+
+        if (me != null && (racer == me || racer.transform.IsChildOf(me.transform))) continue;
+        float dist = Vector3.Distance(transform.position, racer.transform.position);
         if (dist > detectRadius) continue;
         
-        Vector3 toTarget = (hit.transform.position - transform.position).normalized;
+        Vector3 toTarget = (racer.transform.position - transform.position).normalized;
         float dot = Vector3.Dot(fwd, toTarget);
 
         // 전방 75도 이내만 탐지
         if (dot > Mathf.Cos(75f * Mathf.Deg2Rad) && dist < minDist)
         {
-          target = hit.transform;
+          target = racer.transform;
           minDist = dist;
         }
       }
@@ -96,7 +131,7 @@ public class MissileProj : MonoBehaviour
     // 타깃 발견 시 추적
     if (target != null)
     {
-      Vector3 targetPos = target.position + Vector3.up * 2f;
+      Vector3 targetPos = target.position + Vector3.up;
       Vector3 dir = (targetPos - transform.position).normalized;
       rb.velocity = baseVel + dir * speed;
       transform.rotation = Quaternion.LookRotation(rb.velocity, Vector3.up);
@@ -121,7 +156,7 @@ public class MissileProj : MonoBehaviour
 
     // 미사일 맞았을 때
     var car = collision.gameObject.GetComponent<CarController>();
-    //var aiCar = collision.gameObject.GetComponent<AICarController>();
+    var aiCar = collision.gameObject.GetComponent<AICarController>();
 
     if (collision.gameObject == me) return;
 
@@ -131,10 +166,10 @@ public class MissileProj : MonoBehaviour
       car.StartCoroutine(car.HitByMissileCoroutine());
     }
 
-    //if(aiCar != null)
-    //{
-    //  aiCar.StartCoroutine(aiCar.HitByMissileCoroutine());
-    //}
+    if (aiCar != null)
+    {
+      aiCar.StartCoroutine(aiCar.HitByMissileCoroutine());
+    }
 
     if (explosionFx != null)
     {
