@@ -12,6 +12,11 @@ public class StartCount : MonoBehaviour
   [Min(1)] public int seconds = 3; // 3,2,1
   [Min(0)] public float goHold = 0.7f; // "GO!" 표시 유지 시간
 
+  [Header("Audio")]
+  public AudioSource mainSource; //�ܺμҸ� ȿ����  
+  public AudioClip countClip;
+  public AudioClip startClip;
+
   void Start()
   {
     TimeManager.Instance?.StopTimer();
@@ -33,6 +38,8 @@ public class StartCount : MonoBehaviour
   }
   IEnumerator CountRoutine()
   {
+    mainSource.PlayOneShot(countClip);
+    mainSource.PlayOneShot(startClip);
     // 카운트 동안 시간 정지 + unscaled 대기
     Time.timeScale = 0f;
 

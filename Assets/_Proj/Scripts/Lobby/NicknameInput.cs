@@ -12,7 +12,10 @@ public class NicknameInput : MonoBehaviour
     [SerializeField] Button OkButton;
     [SerializeField] GameObject panelRoot;
 
-    const int MaxLen = 6;
+  public AudioSource source;
+  public AudioClip buttonSound;
+
+  const int MaxLen = 6;
     void OnEnable()
     {
         // 패널이 열릴 때 입력창 자동 포커스 + 커서 깜빡임 활성화
@@ -28,7 +31,12 @@ public class NicknameInput : MonoBehaviour
             SanitizeAndUpdate(inputField.text);
 
         }
+    if (OkButton != null)
+    {
+      OkButton.onClick.RemoveAllListeners();
+      OkButton.onClick.AddListener(OnSubmitNickname);
     }
+  }
     void OnDisable()
     {
         if (inputField != null)
@@ -89,9 +97,9 @@ public class NicknameInput : MonoBehaviour
         PlayerPrefs.SetString("PlayerNickname", nick);
         PlayerPrefs.Save();
 
-        // 패널 닫기
-        if (panelRoot) panelRoot.SetActive(false);
+    // 패널 닫기
+    if (panelRoot) { panelRoot.SetActive(false); source.PlayOneShot(buttonSound); }
 
-        Debug.Log($"[NicknameInput] 닉네임 저장 완료: {nick}");
+      Debug.Log($"[NicknameInput] 닉네임 저장 완료: {nick}");
     }
 }

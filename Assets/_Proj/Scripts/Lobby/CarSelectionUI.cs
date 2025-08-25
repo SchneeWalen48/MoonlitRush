@@ -1,56 +1,60 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class CarSelectionUI : MonoBehaviour
-{     
-    public GameObject[] carPrefabs;  //ÇöÀç ¹è¿­¿¡ ³ÖÀº car´Â ÀÓ½Ã·Î ÈÄ¿¡ ¼öÁ¤
-    int selectedCarIndex = 0;
+{
+  public GameObject[] carPrefabs;  //í˜„ì¬ ë°°ì—´ì— ë„£ì€ carëŠ” ì„ì‹œë¡œ í›„ì— ìˆ˜ì •
+  int selectedCarIndex = 0;
 
-    private void Start()
+  [SerializeField] private AudioSource source;
+  public AudioClip selectedCarClip;
+
+  private void Start()
+  {
+    // ê²Œì„ ì‹œì‘ ì‹œ ì²« ë²ˆì§¸ ì°¨ëŸ‰ë§Œ í™œì„±í™”
+    for (int i = 0; i < carPrefabs.Length; i++)
     {
-        // °ÔÀÓ ½ÃÀÛ ½Ã Ã¹ ¹øÂ° Â÷·®¸¸ È°¼ºÈ­
-        for (int i = 0; i < carPrefabs.Length; i++)
-        {
-            carPrefabs[i].SetActive(i == selectedCarIndex);
-        }       
+      carPrefabs[i].SetActive(i == selectedCarIndex);
     }
+  }
 
-    public void SelectNextCar() //´ÙÀ½ Â÷·®À¸·Î º¯°æ
+  public void SelectNextCar() //ë‹¤ìŒ ì°¨ëŸ‰ìœ¼ë¡œ ë³€ê²½
+  {
+    selectedCarIndex++;
+    if (selectedCarIndex >= carPrefabs.Length)
     {
-        selectedCarIndex++;
-        if(selectedCarIndex >= carPrefabs.Length)
-        {
-            selectedCarIndex = 0;
-        }        
-        UpdateCarDisplay();
+      selectedCarIndex = 0;
     }
+    UpdateCarDisplay();
+    source.PlayOneShot(selectedCarClip);
+  }
 
-    public void SelectPreviousCar() //ÀÌÀü Â÷·®À¸·Î º¯°æ
+  public void SelectPreviousCar() //ì´ì „ ì°¨ëŸ‰ìœ¼ë¡œ ë³€ê²½
+  {
+    selectedCarIndex--;
+    if (selectedCarIndex < 0)
     {
-        selectedCarIndex--;
-        if( selectedCarIndex < 0)
-        {
-            selectedCarIndex = carPrefabs.Length - 1;
-        }      
-        UpdateCarDisplay();
+      selectedCarIndex = carPrefabs.Length - 1;
     }
+    UpdateCarDisplay();
+    source.PlayOneShot(selectedCarClip);
+  }
 
-    void UpdateCarDisplay()
+  void UpdateCarDisplay()
+  {
+    //ëª¨ë“  ì°¨ëŸ‰ ë¹„í™œì„±í™”
+    foreach (var car in carPrefabs)
     {
-        //¸ğµç Â÷·® ºñÈ°¼ºÈ­
-        foreach (var car in carPrefabs) { 
-        car.SetActive(false);
-        }
-        //¼±ÅÃµÈ Â÷·®¸¸ È°¼ºÈ­
-        carPrefabs[selectedCarIndex].SetActive(true);
+      car.SetActive(false);
     }
+    //ì„ íƒëœ ì°¨ëŸ‰ë§Œ í™œì„±í™”
+    carPrefabs[selectedCarIndex].SetActive(true);
+  }
 
 
-    // Â÷·® ¼±ÅÃ Á¤º¸ ÀúÀå¸¸
-    public void SaveSelection()
-    {
-        PlayerPrefs.SetInt("SelectedCarIndex", selectedCarIndex);
-        PlayerPrefs.SetInt("CarCount", carPrefabs.Length); // ¹è¿­ ±æÀÌ µ¿±âÈ­
-    }
+  // ì°¨ëŸ‰ ì„ íƒ ì •ë³´ ì €ì¥ë§Œ
+  public void SaveSelection()
+  {
+    PlayerPrefs.SetInt("SelectedCarIndex", selectedCarIndex);
+    PlayerPrefs.SetInt("CarCount", carPrefabs.Length); // ë°°ì—´ ê¸¸ì´ ë™ê¸°í™”
+  }
 }

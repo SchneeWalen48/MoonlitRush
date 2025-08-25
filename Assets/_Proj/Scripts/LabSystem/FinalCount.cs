@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -27,6 +26,9 @@ public class FinalCount : MonoBehaviour
 
   bool isGameEnding;
 
+  public AudioSource source;
+  public AudioClip clip;
+
   void Awake()
   {
     Instance = this;
@@ -48,6 +50,7 @@ public class FinalCount : MonoBehaviour
 
   IEnumerator CoFinal(int sec, RacerInfo winner)
   {
+    source.PlayOneShot(clip);
     if (finalCountText) finalCountText.gameObject.SetActive(true);
 
     for (int i = sec; i > 0; i--)
