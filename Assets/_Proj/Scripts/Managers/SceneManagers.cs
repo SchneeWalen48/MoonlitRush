@@ -20,7 +20,7 @@ public class SceneManagers : MonoBehaviour
   }
 
   // Load by scene name
-  public void LoadScene(string sceneName)
+  public static void LoadScene(string sceneName)
   {
     if(!string.IsNullOrEmpty(sceneName))
       UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);

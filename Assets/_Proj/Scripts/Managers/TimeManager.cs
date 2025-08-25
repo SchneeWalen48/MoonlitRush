@@ -2,13 +2,33 @@
 using System.Linq;
 using UnityEngine;
 
+
 public class TimeManager : MonoBehaviour
 {
+    public static string FormatTimeOrNoRecord(PlayerTimeData p)
+    {
+        if (p == null || !p.finished) return "No Record";
+        return FormatTime(p.finishTime);
+    }
+
+    private readonly List<string> _allRacerNames = new List<string>();
+
     // Singleton Instance : Accessible from anywhere
     public static TimeManager Instance;
 
     [Header("Podium")]
     public GameObject winnerPodiumPrefab;
+
+    public void CaptureRoster(List<RacerInfo> racers)
+    {
+        _allRacerNames.Clear();
+        if (racers == null) return;
+        foreach (var r in racers)
+        {
+            if (r != null && !string.IsNullOrEmpty(r.displayName))
+                _allRacerNames.Add(r.displayName);
+        }
+    }
 
     public class PlayerTimeData
     {
@@ -135,9 +155,62 @@ public class TimeManager : MonoBehaviour
             winnerPodiumPrefab = ri.podiumDisplayPrefab;
     }
 
+    public List<PlayerTimeData> GetRankingFull()
+    {
+        var list = new List<PlayerTimeData>(GetRanking());
+        list.Sort((a, b) => a.finishTime.CompareTo(b.finishTime));
+
+        var has = new HashSet<string>();
+        foreach (var r in list) has.Add(r.playerName);
+
+        // 1) 레이스 씬에서 저장해둔 전체 명단 우선 사용
+        if (_allRacerNames.Count > 0)
+        {
+            var names = new List<string>(_allRacerNames);
+            names.Sort(System.StringComparer.Ordinal);
+
+            foreach (var name in names)
+            {
+                if (!has.Contains(name))
+                {
+                    list.Add(new PlayerTimeData
+                    {
+                        playerName = name,
+                        finished = false,
+                        finishTime = float.PositiveInfinity
+                    });
+                }
+            }
+        }
+        // 2) 캐시가 비어있을 때만 RaceManager를 백업용으로 시도
+        else if (RaceManager.Instance != null && RaceManager.Instance.racers != null)
+        {
+            var everyone = RaceManager.Instance.racers;
+            everyone.Sort((x, y) => string.Compare(x.displayName, y.displayName, System.StringComparison.Ordinal));
+            foreach (var ri in everyone)
+            {
+                if (!has.Contains(ri.displayName))
+                {
+                    list.Add(new PlayerTimeData
+                    {
+                        playerName = ri.displayName,
+                        finished = false,
+                        finishTime = float.PositiveInfinity
+                    });
+                }
+            }
+        }
+
+        return list;
+    }
     public List<PlayerTimeData> GetRanking()
     {
-        return data.OrderBy(p => p.finishTime).ToList(); // Sort racing records by fastest time
+        if (data == null) return new List<PlayerTimeData>();
+        var list = new List<PlayerTimeData>();
+        foreach (var d in data)
+            if (d != null && d.finished)
+                list.Add(d);
+        list.Sort((a, b) => a.finishTime.CompareTo(b.finishTime));
+        return list;
     }
-
 }

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class RaceManager : MonoBehaviour
 {
@@ -16,6 +17,11 @@ public class RaceManager : MonoBehaviour
     public TextMeshProUGUI lapText;
     public TextMeshProUGUI timeText;
 
+    void Start()
+    {
+        var tm = TimeManager.Instance;
+        if (tm != null) tm.CaptureRoster(racers);
+    }
     void Awake()
     {
         if (Instance == null) Instance = this;
