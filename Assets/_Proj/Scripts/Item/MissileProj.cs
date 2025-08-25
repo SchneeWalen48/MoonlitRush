@@ -38,6 +38,8 @@ public class MissileProj : MonoBehaviour
   }
   public void Init(float power, float duration, GameObject shooter, GameObject fxPrefab, Transform fwdBasis = null)
   {
+    if(rb==null) rb = GetComponent<Rigidbody>();
+    if (rb != null) rb.isKinematic = false;
     rb = GetComponent<Rigidbody>();
     speed = power; // ItemData에서 덮어씀
     me = shooter; // ItemData에서 덮어씀
@@ -69,7 +71,9 @@ public class MissileProj : MonoBehaviour
   {
     if (rb == null) return;
 
-    Vector3 fwd = (rb.velocity.sqrMagnitude > 0.01f) ? rb.velocity.normalized 
+        //Debug.Log($"미사일 속도: {rb.velocity.magnitude}");
+
+        Vector3 fwd = (rb.velocity.sqrMagnitude > 0.01f) ? rb.velocity.normalized 
       : (launchFwd != Vector3.zero ? launchFwd : transform.forward);
 
     // 가장 가까운 대상 탐색
@@ -90,7 +94,7 @@ public class MissileProj : MonoBehaviour
         var allAIs = GameObject.FindGameObjectsWithTag("AIPlayer");
         foreach (var ai in allAIs)
         {
-          if (me != null && ai == me || ai.transform.IsChildOf(me.transform)) continue; // 자신 제외
+          if (me != null &&( ai == me || ai.transform.IsChildOf(me.transform))) continue; // 자신 제외
           racers.Add(ai);
         }
 
@@ -153,8 +157,8 @@ public class MissileProj : MonoBehaviour
     print("충돌 " + collision.gameObject.name);
 
     // 미사일 맞았을 때
-    var car = collision.gameObject.GetComponent<CarController>();
-    var aiCar = collision.gameObject.GetComponent<AICarController>();
+    var car = collision.gameObject.GetComponentInParent<CarController>();
+    var aiCar = collision.gameObject.GetComponentInParent<AICarController>();
 
     if (collision.gameObject == me) return;
 

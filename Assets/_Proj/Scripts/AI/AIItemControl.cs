@@ -1,12 +1,12 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class AIItemControl : MonoBehaviour
 {
-    private List<ItemData> itemInventory = new List<ItemData>(); // º¸À¯ ¾ÆÀÌÅÛ ¸®½ºÆ®
-    private float decisionDelay = 1f; // »ç¿ë ÆÇ´Ü °£°İ
-    private float lastDecisionTime; //¸¶Áö¸· »ç¿ë ½Ã°£
+    private List<ItemData> itemInventory = new List<ItemData>(); // ë³´ìœ  ì•„ì´í…œ ë¦¬ìŠ¤íŠ¸
+    private float decisionDelay = 3f; // ì‚¬ìš© íŒë‹¨ ê°„ê²©
+    private float lastDecisionTime; //ë§ˆì§€ë§‰ ì‚¬ìš© ì‹œê°„
     private Transform aiTransform;
     
 
@@ -20,39 +20,39 @@ public class AIItemControl : MonoBehaviour
         if (itemInventory.Count == 0) return;
         if (Time.time - lastDecisionTime < decisionDelay) return;
 
-        // ¸®½ºÆ® ¼øÈ¸ÇÏ¸ç Á¶°Ç¿¡ ¸ÂÀ¸¸é »ç¿ë
+        // ë¦¬ìŠ¤íŠ¸ ìˆœíšŒí•˜ë©° ì¡°ê±´ì— ë§ìœ¼ë©´ ì‚¬ìš©
         for (int i = 0; i < itemInventory.Count; i++)
         {
             ItemData item = itemInventory[i];
             switch (item.type)
             {
                 case ItemType.Booster:
-                    if (IsStraightRoad()) { Debug.Log("¾ÆÀÌÅÛ: ºÎ½ºÅÍ »ç¿ë"); Use(i); break; }
-                    //Á÷¼± ±¸°£¿¡¼­ »ç¿ë
+                    if (IsStraightRoad()) { Use(i); break; }
+                    //ì§ì„  êµ¬ê°„ì—ì„œ ì‚¬ìš©
                     
                     break;
                 case ItemType.Missile:
-                    if (HasTargetAhead()) { Debug.Log("¾ÆÀÌÅÛ: ¹Ì»çÀÏ »ç¿ë"); Use(i); break; }
-                    //¾Õ¿¡ »ó´ë°¡ ÀÖÀ¸¸é »ç¿ë
+                    if (HasTargetAhead()) { Use(i); break; }
+                    //ì•ì— ìƒëŒ€ê°€ ìˆìœ¼ë©´ ì‚¬ìš©
                    
                     break;
                 case ItemType.Shield:
-                    if (IsThreatDetected()) { Debug.Log("¾ÆÀÌÅÛ: ½Çµå »ç¿ë"); Use(i); break; }
-                    //¹Ì»çÀÏ °ø°İ ¹ŞÀ» ½Ã »ç¿ë(È®·ü 5:5)
+                    if (IsThreatDetected()) { Use(i); break; }
+                    //ë¯¸ì‚¬ì¼ ê³µê²© ë°›ì„ ì‹œ ì‚¬ìš©(í™•ë¥  5:5)
                    
                     break;
             }
         }
     }
 
-    // ¾ÆÀÌÅÛ È¹µæ (AIItemCollector¿¡¼­ È£Ãâ)
+    // ì•„ì´í…œ íšë“ (AIItemCollectorì—ì„œ í˜¸ì¶œ)
     public void PickupItem(ItemData item)
     {
-        if (itemInventory.Count >= 2) return; // ÃÖ´ë 2°³±îÁö¸¸ º¸À¯
+        if (itemInventory.Count >= 2) return; // ìµœëŒ€ 2ê°œê¹Œì§€ë§Œ ë³´ìœ 
         itemInventory.Add(item);        
     }
 
-    // ½ÇÁ¦ »ç¿ë Ã³¸®
+    // ì‹¤ì œ ì‚¬ìš© ì²˜ë¦¬
     private void Use(int index)
     {
         ItemData item = itemInventory[index];
@@ -69,24 +69,24 @@ public class AIItemControl : MonoBehaviour
                 break;
         }
 
-        itemInventory.RemoveAt(index); // »ç¿ë ÈÄ Á¦°Å
-        Debug.Log("¾ÆÀÌÅÛ »ç¿ë ÈÄ Á¦°ÅµÊ");
+        itemInventory.RemoveAt(index); // ì‚¬ìš© í›„ ì œê±°
+        //Debug.Log("ì•„ì´í…œ ì‚¬ìš© í›„ ì œê±°ë¨");
         lastDecisionTime = Time.time;
     }
 
     private bool IsThreatDetected()
     {
-        // µÚÂÊ¿¡¼­ ¹Ì»çÀÏÀÌ ÀÖ´ÂÁö È®ÀÎ
-        Collider[] hits = Physics.OverlapSphere(transform.position, 15f); // ¹İ°æ 15 À¯´Ö Å½Áö
+        // ë’¤ìª½ì—ì„œ ë¯¸ì‚¬ì¼ì´ ìˆëŠ”ì§€ í™•ì¸
+        Collider[] hits = Physics.OverlapSphere(transform.position, 15f); // ë°˜ê²½ 15 ìœ ë‹› íƒì§€
         foreach (var hit in hits)
         {
-            if (hit.CompareTag("ItemMissile")) // ¹Ì»çÀÏ ÅÂ±×
+            if (hit.CompareTag("ItemMissile")) // ë¯¸ì‚¬ì¼ íƒœê·¸
             {
                 Vector3 dirToMissile = hit.transform.position - transform.position;
-                // µÚÂÊ¿¡¼­ ¿À´Â °æ¿ì¸¸ ÆÇ´Ü
+                // ë’¤ìª½ì—ì„œ ì˜¤ëŠ” ê²½ìš°ë§Œ íŒë‹¨
                 if (Vector3.Dot(transform.forward, dirToMissile.normalized) < -0.5f)
                 {
-                    return Random.value < 0.5f; // 50% È®·ü·Î »ç¿ë
+                    return Random.value < 0.5f; // 50% í™•ë¥ ë¡œ ì‚¬ìš©
                 }
             }
         }
@@ -94,7 +94,7 @@ public class AIItemControl : MonoBehaviour
         return false;
     }
 
-    //Á÷¼± ±¸°£ ÆÇ´Ü
+    //ì§ì„  êµ¬ê°„ íŒë‹¨
     private bool IsStraightRoad()
     {
         Vector3 forward = aiTransform.forward;
@@ -102,15 +102,15 @@ public class AIItemControl : MonoBehaviour
         return Vector3.Angle(projected, Vector3.forward) < 15f;
     }
 
-    //Àü¹æ¿¡ »ó´ë°¡ ÀÖ´ÂÁö Å½»ö
+    //ì „ë°©ì— ìƒëŒ€ê°€ ìˆëŠ”ì§€ íƒìƒ‰
     private bool HasTargetAhead()
     {
         RaycastHit hit;
         if (Physics.Raycast(transform.position, transform.forward, out hit, 30f))
         {
             if (hit.collider.CompareTag("Player") || hit.collider.CompareTag("AIPlayer"))
-            { return true; } // ÇÃ·¹ÀÌ¾îÀÎÁö ÆÇ´Ü
-            else { return false; } //º® µî Àå¾Ö¹°ÀÌ¶ó¸é ¹Ì»çÀÏ ¹ß»ç X
+            { return true; } // í”Œë ˆì´ì–´ì¸ì§€ íŒë‹¨
+            else { return false; } //ë²½ ë“± ì¥ì• ë¬¼ì´ë¼ë©´ ë¯¸ì‚¬ì¼ ë°œì‚¬ X
         }
         return false;
     }

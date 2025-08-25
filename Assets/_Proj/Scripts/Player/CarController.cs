@@ -159,11 +159,11 @@ public class CarController : MonoBehaviour
 
   void FixedUpdate()
   {
-    if (Time.frameCount % 60 == 0)
-    {
-      Debug.Log($"[{name}] lv.z={currCarLocalVel.z:F2}, gear={currGear}, " +
-                $"Accel={acceleration}, RL={tires[2].name}, RR={tires[3].name}");
-    }
+    //if (Time.frameCount % 60 == 0)
+    //{
+    //  Debug.Log($"[{name}] lv.z={currCarLocalVel.z:F2}, gear={currGear}, " +
+    //            $"Accel={acceleration}, RL={tires[2].name}, RR={tires[3].name}");
+    //}
     Suspension();
     GroundCheck();
 
@@ -681,14 +681,14 @@ public class CarController : MonoBehaviour
         rb.AddForceAtPosition(netForce * rayPoints[i].up, rayPoints[i].position);
 
         SetTirePosition(tires[i], hit.point + rayPoints[i].up * wheelRadius / 2);
-        Debug.DrawLine(rayPoints[i].position, hit.point, Color.red);
+        //Debug.DrawLine(rayPoints[i].position, hit.point, Color.red);
       }
       else
       {
         wheelIsGrounded[i] = 0;
 
         SetTirePosition(tires[i], rayPoints[i].position - rayPoints[i].up * (restLen + springTravel) * 0.9f);
-        Debug.DrawLine(rayPoints[i].position, rayPoints[i].position + (wheelRadius + maxDistance) * -rayPoints[i].up, Color.green);
+        //Debug.DrawLine(rayPoints[i].position, rayPoints[i].position + (wheelRadius + maxDistance) * -rayPoints[i].up, Color.green);
       }
     }
   }
@@ -723,7 +723,7 @@ public class CarController : MonoBehaviour
     {
       if (other.CompareTag("SpeedUp"))
       {
-        Debug.Log($"감지 : {other.tag}");
+        //Debug.Log($"감지 : {other.tag}");
         if (boostApplyer != null)
         {
           boostApplyer.ApplyBoost(2f, 1.1f, 1.5f); // 시간, 크기, 속도
@@ -732,19 +732,19 @@ public class CarController : MonoBehaviour
         rb.AddForce(transform.forward * acceleration * 30f, ForceMode.Acceleration); // 슬로프 탈 때 속도 감속 강제 보정
 
         float targetBoostSpeed = maxSpeed * 1.25f; // 내 차 최고속도의 125%
-        ApplyTransientOverdrive(add: maxSpeed * 0.12f, minFwdIfLower: maxSpeed * 0.5f);
+        ApplyTransientOverdrive(add: maxSpeed * 0.15f, minFwdIfLower: maxSpeed * 0.5f);
       }
 
       if (other.CompareTag("Barrel"))
       {
-        Debug.Log($"감지 : {other.tag}");
+        //Debug.Log($"감지 : {other.tag}");
         if (!isBarrelRolling)
           StartCoroutine(BarrelRollCoroutine());
       }
 
       if (other.CompareTag("BoostPad"))
       {
-        Debug.Log($"감지 : {other.tag}");
+        //Debug.Log($"감지 : {other.tag}");
         if (boostApplyer != null)
         {
           boostApplyer.ApplyBoost(2f, 1.1f, 2f);

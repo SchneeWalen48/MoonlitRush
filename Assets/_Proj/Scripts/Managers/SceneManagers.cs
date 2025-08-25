@@ -11,7 +11,6 @@ public class SceneManagers : MonoBehaviour
     if(Instance == null)
     {
       Instance = this;
-      DontDestroyOnLoad(gameObject); // Maintain when changing scenes
     }
     else
     {
@@ -23,20 +22,20 @@ public class SceneManagers : MonoBehaviour
   public static void LoadScene(string sceneName)
   {
     if(!string.IsNullOrEmpty(sceneName))
-      UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
+      SceneManager.LoadScene(sceneName);
   }
 
   // Load by scene index
   public void LoadScene(int sceneIdx)
   {
-    if(sceneIdx >= 0 && sceneIdx < UnityEngine.SceneManagement.SceneManager.sceneCountInBuildSettings)
-      UnityEngine.SceneManagement.SceneManager.LoadScene(sceneIdx);
+    if(sceneIdx >= 0 && sceneIdx < SceneManager.sceneCountInBuildSettings)
+      SceneManager.LoadScene(sceneIdx);
   }
 
   // Reload current scene
   public void ReloadScene()
   {
-    UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
   }
 
   public void QuitGame()
