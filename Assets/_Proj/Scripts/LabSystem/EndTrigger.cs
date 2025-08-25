@@ -31,6 +31,7 @@ public class EndTrigger : MonoBehaviour
     int total = RaceManager.Instance ? RaceManager.Instance.totalLaps : 2;
     if (ri.lapCounter.currentLap < total) return;
 
+    // 완주 순서
     if (!ri.finished)
     {
       ri.finished = true;
@@ -38,9 +39,14 @@ public class EndTrigger : MonoBehaviour
         ri.finishOrder = ++RaceManager.Instance.finishCounter;
     }
 
+    // 그 순간의 정확한 시간 캡처
+    if (ri.finishClock < 0 && TimeManager.Instance != null)
+      ri.finishClock = TimeManager.Instance.RaceDuration;
+
+    // 기록(중복 방지) - AI/Player 모두
     if (TimeManager.Instance != null && !recorded.Contains(ri))
     {
-      TimeManager.Instance.RecordFinishTime(ri, TimeManager.Instance.RaceDuration);
+      TimeManager.Instance.RecordFinishTime(ri, ri.finishClock); //위에서 캡처된 값으로
       recorded.Add(ri);
     }
     if (!finalStarted)

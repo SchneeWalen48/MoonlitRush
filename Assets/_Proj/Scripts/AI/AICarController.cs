@@ -431,7 +431,7 @@ public class AICarController : MonoBehaviour
                 boostApplyer.ApplyBoost(2f, 1f, 1.5f);
             }
 
-            boostCoroutine = StartCoroutine(BoostRoutine(40, 1.5f));
+            boostCoroutine = StartCoroutine(BoostRoutine(30, 1.5f));
         }
         else if (other.CompareTag("SpeedUp"))
         {

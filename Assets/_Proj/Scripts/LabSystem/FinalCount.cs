@@ -140,7 +140,48 @@ public class FinalCount : MonoBehaviour
       tm.EnsureDNFsFrom(rm.racers);
 
       // 2) 최종 순위 생성 (완주자 → 미완주자)
-      var final = BuildFinalResults(rm.racers, tm);
+      var dict = tm.data.ToDictionary(x => x.playerName, x => x);
+      var final = new List<TimeManager.PlayerTimeData>();
+
+      foreach(var r in rm.racers.Where(x => x && x.finished). OrderBy(x => x.finishOrder))
+      {
+        string name = TimeManager.SafeNameOf(r);
+        if (dict.TryGetValue(name, out var p))
+          final.Add(p);
+        else
+        {
+          float f = (r.finishClock >= 0) ? r.finishClock : -1f;
+          final.Add(new TimeManager.PlayerTimeData
+          {
+            playerName = name,
+            finishTime = f,
+            finished = (f >= 0),
+            isPlayer = r.isPlayer
+          });
+        }
+      }
+      var notFinished = rm.racers.Where(x => x && !x.finished && x.lapCounter && x.lapCounter.checkpointManager)
+        .OrderByDescending(x => x.lapCounter.currentLap)
+        .ThenByDescending(x => x.lapCounter.nextCheckpoint ? x.lapCounter.nextCheckpoint.checkpointId : 0)
+        .ThenBy(x =>
+        {
+          var lc = x.lapCounter;
+          return lc?.nextCheckpoint ? Vector3.Distance(x.transform.position, lc.nextCheckpoint.transform.position) : float.MaxValue;
+        });
+
+      foreach (var r in notFinished)
+      {
+        string name = TimeManager.SafeNameOf(r);
+        if (dict.TryGetValue(name, out var p)) final.Add(p);
+        else final.Add(new TimeManager.PlayerTimeData
+        {
+          playerName = name,
+          finishTime = -1f,
+          finished = false,
+          isPlayer = r.isPlayer
+        });
+      }
+      //var final = BuildFinalResults(rm.racers, tm);
 
       // 3) 엔딩에 넘길 데이터 확정
       RaceDataStore.RankingData = final;
