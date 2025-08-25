@@ -25,7 +25,7 @@ public class RankingUI : MonoBehaviour
         if (rankingPanel) rankingPanel.SetActive(true);
         if (rankingListParent == null || rankingEntryPrefab == null || results == null)
         {
-            Debug.LogWarning("[RankingUI] refs or data missing.");
+            //Debug.LogWarning("[RankingUI] refs or data missing.");
             return;
         }
 

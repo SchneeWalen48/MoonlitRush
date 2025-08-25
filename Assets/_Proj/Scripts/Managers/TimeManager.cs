@@ -180,7 +180,7 @@ public class TimeManager : MonoBehaviour
   {
     return (p != null && p.finished && p.finishTime >= 0f)
         ? FormatTime(p.finishTime)
-        : "--";
+        : "Time Over";
   }
   //public void TrySetWinnerPrefab(RacerInfo ri)
   //{

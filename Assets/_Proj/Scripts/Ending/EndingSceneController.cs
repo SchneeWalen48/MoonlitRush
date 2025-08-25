@@ -75,7 +75,7 @@ public class EndingSceneController : MonoBehaviour
 
     if (results == null || results.Count == 0)
     {
-      Debug.LogWarning("[Ending] 랭킹 데이터 없음");
+      //Debug.LogWarning("[Ending] 랭킹 데이터 없음");
       if (buttonsRoot) buttonsRoot.SetActive(true);
       yield break;
     }
@@ -84,11 +84,11 @@ public class EndingSceneController : MonoBehaviour
     if (rankingUI)
     {
       rankingUI.ShowRanking(results);
-      Debug.Log($"[Ending] {results.Count}명 랭킹 표시 완료");
+      //Debug.Log($"[Ending] {results.Count}명 랭킹 표시 완료");
     }
     else
     {
-      Debug.LogError("[Ending] RankingUI가 씬에 없습니다! (씬에 배치하고 인스펙터 연결 필요)");
+      //Debug.LogError("[Ending] RankingUI가 씬에 없습니다! (씬에 배치하고 인스펙터 연결 필요)");
     }
 
     // 4) 버튼 표시

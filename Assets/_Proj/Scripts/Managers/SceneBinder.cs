@@ -85,7 +85,7 @@ public class SceneBinder : MonoBehaviour
     if (pMinimapIcon)
       pMinimapIcon.target = car.transform;
 
-    Debug.Log("[SceneAutoWire] Wiring complete.");
+    //Debug.Log("[SceneAutoWire] Wiring complete.");
   }
 
   // ---- First try with field name (multiple candidates), if that fails, match with type ----

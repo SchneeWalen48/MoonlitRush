@@ -32,7 +32,7 @@ public class ItemSlot : MonoBehaviour
       UpdateUI() ;
       return true;
     }
-    Debug.Log("Slots are full");
+    //Debug.Log("Slots are full");
     return false;
   }
 

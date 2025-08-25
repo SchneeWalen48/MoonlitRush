@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 public enum Team { Player, AI }
@@ -18,7 +18,7 @@ public class MissileProj : MonoBehaviour
   [SerializeField] float inheritDecayPerSec = 0f;
   Vector3 inheritedVel;
 
-  [SerializeField] private bool debugTestMode = false; // ¾À¿¡ µĞ Å×½ºÆ®¿ëÀÌ¸é Ã¼Å©
+  [SerializeField] private bool debugTestMode = false; // ì”¬ì— ë‘” í…ŒìŠ¤íŠ¸ìš©ì´ë©´ ì²´í¬
 
 
   void Start()
@@ -27,20 +27,20 @@ public class MissileProj : MonoBehaviour
     
     if (debugTestMode)
     {
-      // Á¦ÀÚ¸® °íÁ¤, Init() ¾È ºÒ·Áµµ Ãæµ¹ »ì¾ÆÀÖÀ½
+      // ì œìë¦¬ ê³ ì •, Init() ì•ˆ ë¶ˆë ¤ë„ ì¶©ëŒ ì‚´ì•„ìˆìŒ
       if (rb != null)
       {
         rb.isKinematic = true;
         rb.velocity = Vector3.zero;
       }
-      me = null; // ÀÚ±â ÀÚ½Å ÆÇÁ¤ ¾ø¾Ú
+      me = null; // ìê¸° ìì‹  íŒì • ì—†ì•°
     }
   }
   public void Init(float power, float duration, GameObject shooter, GameObject fxPrefab, Transform fwdBasis = null)
   {
     rb = GetComponent<Rigidbody>();
-    speed = power; // ItemData¿¡¼­ µ¤¾î¾¸
-    me = shooter; // ItemData¿¡¼­ µ¤¾î¾¸
+    speed = power; // ItemDataì—ì„œ ë®ì–´ì”€
+    me = shooter; // ItemDataì—ì„œ ë®ì–´ì”€
     lifeTime = duration;
     explosionFx = fxPrefab;
 
@@ -69,14 +69,14 @@ public class MissileProj : MonoBehaviour
   {
     if (rb == null) return;
 
-        Debug.Log($"¹Ì»çÀÏ ¼Óµµ: {rb.velocity.magnitude}");
+        //Debug.Log($"ë¯¸ì‚¬ì¼ ì†ë„: {rb.velocity.magnitude}");
 
         Vector3 fwd = (rb.velocity.sqrMagnitude > 0.01f) ? rb.velocity.normalized 
       : (launchFwd != Vector3.zero ? launchFwd : transform.forward);
 
-    // °¡Àå °¡±î¿î ´ë»ó Å½»ö
-    // ÁÖÃ¼ Player => AIÅ½»ö
-    // ÁÖÃ¼ AI => AI + Player Å½»ö
+    // ê°€ì¥ ê°€ê¹Œìš´ ëŒ€ìƒ íƒìƒ‰
+    // ì£¼ì²´ Player => AIíƒìƒ‰
+    // ì£¼ì²´ AI => AI + Player íƒìƒ‰
     if (target == null)
     {
       List<GameObject> racers = new List<GameObject>();
@@ -92,7 +92,7 @@ public class MissileProj : MonoBehaviour
         var allAIs = GameObject.FindGameObjectsWithTag("AIPlayer");
         foreach (var ai in allAIs)
         {
-          if (me != null && ai == me || ai.transform.IsChildOf(me.transform)) continue; // ÀÚ½Å Á¦¿Ü
+          if (me != null && ai == me || ai.transform.IsChildOf(me.transform)) continue; // ìì‹  ì œì™¸
           racers.Add(ai);
         }
 
@@ -118,7 +118,7 @@ public class MissileProj : MonoBehaviour
         Vector3 toTarget = (racer.transform.position - transform.position).normalized;
         float dot = Vector3.Dot(fwd, toTarget);
 
-        // Àü¹æ 75µµ ÀÌ³»¸¸ Å½Áö
+        // ì „ë°© 75ë„ ì´ë‚´ë§Œ íƒì§€
         if (dot > Mathf.Cos(75f * Mathf.Deg2Rad) && dist < minDist)
         {
           target = racer.transform;
@@ -128,7 +128,7 @@ public class MissileProj : MonoBehaviour
     }
     Vector3 baseVel = inheritedVel;
 
-    // Å¸±ê ¹ß°ß ½Ã ÃßÀû
+    // íƒ€ê¹ƒ ë°œê²¬ ì‹œ ì¶”ì 
     if (target != null)
     {
       Vector3 targetPos = target.position + Vector3.up;
@@ -136,7 +136,7 @@ public class MissileProj : MonoBehaviour
       rb.velocity = baseVel + dir * speed;
       transform.rotation = Quaternion.LookRotation(rb.velocity, Vector3.up);
     }
-    // Å¸°Ù ¾øÀ¸¸é Á÷¼±
+    // íƒ€ê²Ÿ ì—†ìœ¼ë©´ ì§ì„ 
     else
     {
       rb.velocity = baseVel + launchFwd * speed;
@@ -152,9 +152,9 @@ public class MissileProj : MonoBehaviour
   {
     if (me != null && (collision.transform == me.transform || collision.transform.IsChildOf(me.transform))) return;
 
-    print("Ãæµ¹ " + collision.gameObject.name);
+    print("ì¶©ëŒ " + collision.gameObject.name);
 
-    // ¹Ì»çÀÏ ¸Â¾ÒÀ» ¶§
+    // ë¯¸ì‚¬ì¼ ë§ì•˜ì„ ë•Œ
     var car = collision.gameObject.GetComponent<CarController>();
     var aiCar = collision.gameObject.GetComponent<AICarController>();
 
@@ -162,7 +162,7 @@ public class MissileProj : MonoBehaviour
 
     if (car != null)
     {
-      // CarController¿¡ ÀÖ´Â Ãæµ¹ È¿°ú ¹ßµ¿
+      // CarControllerì— ìˆëŠ” ì¶©ëŒ íš¨ê³¼ ë°œë™
       car.StartCoroutine(car.HitByMissileCoroutine());
     }
 
