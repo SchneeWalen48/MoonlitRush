@@ -350,12 +350,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d350ed685252ca141ad132e570af843d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  camDistance: 6
-  camOffset: {x: 0, y: -0.5, z: 0}
-  localEuler: {x: 0, y: 180, z: 0}
-  targetLayerName: Default
-  forceOpaqueMaterials: 1
-  rendererOrderInLayer: 0
+  winnerSpot: {fileID: 1079678558}
+  offset: {x: 0, y: 0, z: 0}
+  rotation: {x: 0, y: 0, z: 0}
+  scale: 1
   nameText: {fileID: 539962507}
   timeText: {fileID: 283367245}
   confetti: {fileID: 1879769179923522, guid: 65932b7368590234d8163da03c2055d8, type: 3}
@@ -384,7 +382,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  liftY: 0
+  yOffset: 0
 --- !u!1 &283367243
 GameObject:
   m_ObjectHideFlags: 0
@@ -1937,12 +1935,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2d5e56e541c6624fb2b5c3407711a0e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rankingUI: {fileID: 2079024236}
-  buttonsRoot: {fileID: 136592138}
-  toLobbyButton: {fileID: 176842847}
-  lobbySceneName: Lobby
-  quitButton: {fileID: 457870585}
-  showDelay: 0.6
 --- !u!1 &1886847129
 GameObject:
   m_ObjectHideFlags: 0
