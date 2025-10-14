@@ -320,6 +320,8 @@ public class IntroWaypointCamera : MonoBehaviour
 
     // UI 표시
     SetUIVisible(true);
+    foreach (var lc in FindObjectsOfType<LapCounter>(true))
+      lc.RefreshLapUI();
 
     // 핸드오프(재확인)
     DoHandoffToPlayer();

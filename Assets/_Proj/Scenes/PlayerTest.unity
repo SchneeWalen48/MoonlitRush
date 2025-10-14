@@ -2220,6 +2220,7 @@ MonoBehaviour:
   restLen: 1
   springTravel: 0.5
   wheelRadius: 0.33
+  isFinished: 0
   reverseMaxSpeed: 20
   reverseAccel: 1
   acceleration: 25
@@ -2249,13 +2250,11 @@ MonoBehaviour:
   minSideSkidVel: 10
   engineSound: {fileID: 0}
   minPitch: 1
+  basePitch: 1
   maxPitch: 5
-  gearShiftSound: {fileID: 0}
-  shiftSoundVol: 0.7
-  usePitchDip: 1
-  shiftPitchDiip: 0.75
-  shiftPitchDipTime: 0.06
-  shiftPitchRiseTime: 0.12
+  shiftBurstUpTime: 0.06
+  shiftBurstHoldTime: 0.05
+  shiftBurstDownTime: 0.12
   skidSound: {fileID: 0}
   skidStartSlip: 2
   skidFullSlip: 7
@@ -4257,7 +4256,7 @@ PrefabInstance:
     - target: {fileID: 2379246112198852342, guid: 6728a1830c4573a48925e94c9ad9ca05,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -30.003166
+      value: -43.2
       objectReference: {fileID: 0}
     - target: {fileID: 2379246112198852342, guid: 6728a1830c4573a48925e94c9ad9ca05,
         type: 3}
@@ -4267,7 +4266,7 @@ PrefabInstance:
     - target: {fileID: 2379246112198852342, guid: 6728a1830c4573a48925e94c9ad9ca05,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -55.72029
+      value: -98.2
       objectReference: {fileID: 0}
     - target: {fileID: 2379246112198852342, guid: 6728a1830c4573a48925e94c9ad9ca05,
         type: 3}

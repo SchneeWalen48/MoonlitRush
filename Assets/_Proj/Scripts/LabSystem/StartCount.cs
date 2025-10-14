@@ -22,6 +22,9 @@ public class StartCount : MonoBehaviour
     TimeManager.Instance?.StopTimer();
     FreezeAllCars(true);                 // 안전하게 전원 정지
     if (autoStart) Begin();
+    foreach (var lc in FindObjectsOfType<LapCounter>(true))
+      lc.RefreshLapUI();
+
   }
 
   public void Begin()
