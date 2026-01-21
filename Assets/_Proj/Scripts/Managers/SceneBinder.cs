@@ -3,6 +3,7 @@ using System.Reflection;
 using UnityEngine;
 using Cinemachine;
 using TMPro;
+// 중앙 연결기
 
 // 연결:
 // - ItemCollector.ItemSlots ← Canvas/ItemSlots(ItemSlot 컴포넌트)
@@ -32,6 +33,7 @@ public class SceneBinder : MonoBehaviour
   public MinimapIcon pMinimapIcon;
   public TextMeshProUGUI lapCntText;
 
+  // 차량 스폰이 비동기적으로 완료되기 때문에 LastSpawne가 세팅될 때까지 안전하게 대기
   IEnumerator Start()
   {
     if (!carSpawn) carSpawn = FindObjectOfType<CarSpawn>(true);
@@ -43,10 +45,9 @@ public class SceneBinder : MonoBehaviour
     // --- Cam Binding ---
     if (vcam)
     {
-      vcam.Follow = car.transform;
-      vcam.LookAt = car.transform.childCount > 0 ? car.transform.GetChild(0) : car.transform;
-      //SnapVcamBehind(car.transform, dist: 7f, height: 2.2f);
-      vcam.PreviousStateIsValid = false;
+      vcam.Follow = car.transform; // 추적 대상은 차량 루트
+      vcam.LookAt = car.transform.childCount > 0 ? car.transform.GetChild(0) : car.transform;  // LookAt은 1번 자식(차체 기준점) 우선, 없으면 루트
+      vcam.PreviousStateIsValid = false; // 첫 프레임 튐 방지
       SnapBehind(vcam, car.transform, dist: 4.5f, height: 1.8f, side: 0.0f, fov: 55f);
     }
 
@@ -72,8 +73,6 @@ public class SceneBinder : MonoBehaviour
     // Canvas ItemSlot.useItem ← car.UseItem
     AssignByNameThenType(canvasItemSlots, new[] { "useItem", "UseItem" }, useItem);
 
-    //if (finalCnt && carCtrl) finalCnt.playerCar = carCtrl;
-    //if (startCnt && carCtrl) startCnt.playerCar = carCtrl;
     var lapCounter = car.GetComponent<LapCounter>() ?? car.GetComponentInChildren<LapCounter>();
     if (!lapCntText)
       lapCntText = GameObject.Find("Lap Text")?.GetComponent<TextMeshProUGUI>();
@@ -85,10 +84,9 @@ public class SceneBinder : MonoBehaviour
     }
 
 
+    // 미니맵 아이콘 추적 대상 설정
     if (pMinimapIcon)
       pMinimapIcon.target = car.transform;
-
-    //Debug.Log("[SceneAutoWire] Wiring complete.");
   }
 
   static void SnapBehind(CinemachineVirtualCamera cam, Transform target,
@@ -103,6 +101,7 @@ public class SceneBinder : MonoBehaviour
       tFollow.m_XDamping = tFollow.m_YDamping = tFollow.m_ZDamping = 0f; // 첫 프레임 스냅
     }
 
+    // 3rdPersonFollow 사용 시
     var third = cam.GetCinemachineComponent<Cinemachine3rdPersonFollow>();
     if (third)
     {
@@ -126,6 +125,7 @@ public class SceneBinder : MonoBehaviour
     RestoreDampingNextFrame(cam);
   }
 
+  // 첫 프레임 이후 정상적인 카메라 댐핑 복원
   static async void RestoreDampingNextFrame(CinemachineVirtualCamera cam)
   {
     await System.Threading.Tasks.Task.Yield();
@@ -155,6 +155,7 @@ public class SceneBinder : MonoBehaviour
     return AssignByTypeOnly(target, value.GetType(), value);
   }
 
+  // 타입만으로 필드 자동 매칭
   static bool AssignByTypeOnly(object target, System.Type desired, object value)
   {
     if (target == null || value == null) return false;

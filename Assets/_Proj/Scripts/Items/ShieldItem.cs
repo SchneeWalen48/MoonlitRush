@@ -20,12 +20,12 @@ public class ShieldItem : MonoBehaviour
     isShield = true;
 
     var controller = GetComponent<CarController>();
+    // 무적 상태 부여
     if (controller != null)
       controller.isInvincible = true;
 
     if(fx != null)
     {
-      //Debug.Log("쉴드 이펙트 생성됨!");
       fxPrefab = Instantiate(fx, transform.position, Quaternion.identity, transform);
     }
 

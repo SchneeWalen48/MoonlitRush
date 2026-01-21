@@ -13,9 +13,9 @@ public class CarController : MonoBehaviour
   [SerializeField] private Rigidbody rb;
   [SerializeField] private Transform[] rayPoints;
   [SerializeField] private LayerMask drivable;
-  [SerializeField] private Transform accelPoint;
-  [SerializeField] private GameObject[] tires = new GameObject[4];
-  [SerializeField] private GameObject[] frontTireParents = new GameObject[2];
+  [SerializeField] private Transform accelPoint; // 가속 기준점
+  [SerializeField] private GameObject[] tires = new GameObject[4]; // 타이어 메쉬
+  [SerializeField] private GameObject[] frontTireParents = new GameObject[2]; // 앞바퀴 회전 부모(조향 시각 연출)
   [SerializeField] private TrailRenderer[] skidMarks = new TrailRenderer[2];
   [SerializeField] private ParticleSystem[] skidFxs = new ParticleSystem[2];
   public BoostApplyer boostApplyer;
@@ -23,11 +23,12 @@ public class CarController : MonoBehaviour
 
   #region Suspension
   [Header("Suspension Settings")]
-  [SerializeField] private float springStiffness = 30000f;
-  [SerializeField] private float damperStiffness = 3000f;
-  [SerializeField] private float restLen = 1f;
-  [SerializeField] private float springTravel = 0.5f;
-  [SerializeField] private float wheelRadius = 0.33f;
+  [SerializeField] private float springStiffness = 30000f; // 스프링 강성 –> 높을수록 단단한 서스펜션
+  [SerializeField] private float damperStiffness = 3000f; // 감쇠 계수 –> 흔들림 억제
+  [SerializeField] private float restLen = 1f; // 정지 시 휠 기준 길이
+
+  [SerializeField] private float springTravel = 0.5f; // 서스펜션 이동 허용 범위
+  [SerializeField] private float wheelRadius = 0.33f; // 휠 반지름
   #endregion
 
   int[] wheelIsGrounded = new int[4];
@@ -206,7 +207,10 @@ public class CarController : MonoBehaviour
     maxSpeed = s.maxSpeed;
     deceleration = s.deceleration;
     steerForce = s.steerForce;
+
     turningCurve = s.turningCurve;
+    accelCurve = s.accelCurve;
+
     decelLerpSpeed = s.decelLerpSpeed;
     coastFactor = s.coastFactor;
     minSpeedForFullDecel = s.minSpeedForFullDecel;
@@ -220,7 +224,6 @@ public class CarController : MonoBehaviour
     airGravity = s.airGravity;
     airGravityDuration = s.airGravityDuration;
 
-    accelCurve = s.accelCurve;
 
     brakePow = s.brakePow;
   }
@@ -307,36 +310,45 @@ public class CarController : MonoBehaviour
     {
       if (Mathf.Abs(currCarLocalVel.z) > reverseMaxSpeed)
       {
-        Vector3 lv = transform.InverseTransformDirection(rb.velocity);
-        lv.z = -reverseMaxSpeed;
-        rb.velocity = transform.TransformDirection(lv);
+        Vector3 lv = transform.InverseTransformDirection(rb.velocity); // 설정된 최대 후진 속도를 초과하면 강제로 클램프
+        lv.z = -reverseMaxSpeed; // 월드 속도를 로컬로 변환 후 Z만 제한
+        rb.velocity = transform.TransformDirection(lv); // 다시 월드 좌표로 변환하여 적용
       }
     }
   }
 
   void Turn()
   {
+    // 드리프트 중에는 조향력을 증가시켜 슬라이드 상태에서도 방향 전환 가능하게 만듦
     float currSteerStrength = isDrifting ? steerForce * 1.5f : steerForce;
+
+    // 조향 토크 계산
     rb.AddTorque(currSteerStrength * steerInput * turningCurve.Evaluate(Mathf.Abs(carVelRatio)) * Mathf.Sign(currCarLocalVel.z) * transform.up, ForceMode.Acceleration);
   }
 
   void SidewaysDrag()
   {
-    float currSidewaysSpeed = currCarLocalVel.x;
+    float currSidewaysSpeed = currCarLocalVel.x; // 로컬 X축 속도 = 측면 미끄러짐 크기
 
+    // 드리프트 중에는 횡방향 드래그를 줄여 미끄러짐을 허용하고, 일반 주행에선 강하게 억제
     float targetDrag = isDrifting ? dragCoefficient / driftDragMultiplier : dragCoefficient;
-    currDragCoefficient = Mathf.Lerp(currDragCoefficient, targetDrag, Time.deltaTime * driftTransitionSpeed);
 
+     // 드리프트 진입/해제 시 급격한 변화 방지용 스무딩
+    currDragCoefficient = Mathf.Lerp(currDragCoefficient, targetDrag, Time.deltaTime * driftTransitionSpeed); 
+
+    // 측면 속도에 반대 방향으로 힘 적용
     float dragMagnitude = -currSidewaysSpeed * currDragCoefficient;
     Vector3 dragForce = transform.right * dragMagnitude;
-    rb.AddForceAtPosition(dragForce, rb.worldCenterOfMass, ForceMode.Acceleration);
+    rb.AddForceAtPosition(dragForce, rb.worldCenterOfMass, ForceMode.Acceleration); // 질량 중심에 힘을 가해 불필요한 회전 토크 방지
   }
+  
+  // 접지력 강화를 위한 다운포스 적용
   void ApplyDownforce()
   {
     if (!isGrounded) return; // 공중에선 X
     float v = rb.velocity.magnitude;  // m/s
-    float down = Mathf.Min(baseDownforce + downforcePerMS * v, maxDownforce);
-    rb.AddForce(-transform.up * down, ForceMode.Force);
+    float down = Mathf.Min(baseDownforce + downforcePerMS * v, maxDownforce); // 속도에 비례해 증가하는 다운포스
+    rb.AddForce(-transform.up * down, ForceMode.Force); // 차량 아래 방향으로 힘 적용
   }
   #endregion
 
@@ -352,17 +364,19 @@ public class CarController : MonoBehaviour
 
     Vector3 up = transform.up;
     Vector3 toUpAxis = Vector3.Cross(up, Vector3.up);
-    float sinAngle = toUpAxis.magnitude;
+    float sinAngle = toUpAxis.magnitude; // sin(각도) 크기 (두 벡터가 얼마나 기울어졌는지)
+
+    // 거의 수직일 경우 불필요한 연산/토크 방지
     if (sinAngle > 1e-4f)
     {
-      Vector3 torqueDir = toUpAxis.normalized;
-      float angle = Mathf.Asin(Mathf.Clamp(sinAngle, -1f, 1f));
+      Vector3 torqueDir = toUpAxis.normalized; // 회전 방향(정규화된 회전 축)
+      float angle = Mathf.Asin(Mathf.Clamp(sinAngle, -1f, 1f)); // 실제 기울어진 각도(rad)
 
-      Vector3 corrective = torqueDir * (lvTorqueStrength * angle) - rb.angularVelocity * lvTorqueDamping;
+      Vector3 corrective = torqueDir * (lvTorqueStrength * angle) - rb.angularVelocity * lvTorqueDamping; // 기울어진 각도에 비례한 복원 토크 + 현재 각속도에 반비례한 감쇠 토크
 
-      corrective = Vector3.ClampMagnitude(corrective, maxLvTorque);
+      corrective = Vector3.ClampMagnitude(corrective, maxLvTorque); // 과도한 회전 방지
 
-      rb.AddTorque(corrective, ForceMode.Acceleration);
+      rb.AddTorque(corrective, ForceMode.Acceleration); // 공중에서도 자연스럽게 차체가 세워지도록 토크 적용
     }
   }
   #endregion
@@ -554,10 +568,10 @@ public class CarController : MonoBehaviour
   }
   float CalcLateralSpeed()
   {
-    Vector3 vPlanar = Vector3.ProjectOnPlane(rb.velocity, transform.up);
-    Vector3 vFwd = Vector3.Project(vPlanar, transform.forward);
-    Vector3 vSide = vPlanar - vFwd;
-    return vSide.magnitude; // m/s
+    Vector3 vPlanar = Vector3.ProjectOnPlane(rb.velocity, transform.up); // 차량 Up 기준 평면 성분만 추출
+    Vector3 vFwd = Vector3.Project(vPlanar, transform.forward); // 전방 성분 분리
+    Vector3 vSide = vPlanar - vFwd; // 남은 성분 = 횡방향 미끄러짐
+    return vSide.magnitude; // m/s 단위 횡속
   }
   void UpdatedSkidSound(bool on, float slip)
   {
@@ -642,8 +656,7 @@ public class CarController : MonoBehaviour
     gearsPercents[max - 1] = 1f;
 
     float fwdSpeed = Mathf.Max(0f, currCarLocalVel.z);
-    float speedRatio = Mathf.Clamp01(fwdSpeed / Mathf.Max(0.01f, maxSpeed));
-
+    float speedRatio = Mathf.Clamp01(fwdSpeed / Mathf.Max(0.01f, maxSpeed)); // 기어별 최고 속도 비율 계산
     float currTop = gearsPercents[Mathf.Clamp(currGear - 1, 0, max - 1)];
 
     if (!isHoldingTop)
@@ -661,7 +674,6 @@ public class CarController : MonoBehaviour
         if (speedRatio < prevTop * downshift)
         {
           currGear--;
-          print($"기어 내림 {currGear}");
         }
       }
     }
@@ -670,23 +682,23 @@ public class CarController : MonoBehaviour
       holdTimer -= Time.deltaTime;
       if (holdTimer <= 0f)
       {
+        // 실제 변속 느낌을 위한 순간 감속
         if (!didDropBeforeShift)
         {
           DropForwardSpeedByAmount(dropBeforeShiftAmount);
           didDropBeforeShift = true;
         }
         currGear = Mathf.Min(currGear + 1, max);
-        print($"기어 올림 {currGear}");
         isHoldingTop = false;
         if (engineSound != null)
         {
-          //if (gearShiftSound != null) engineSound.PlayOneShot(gearShiftSound, shiftSoundVol);
           StartCoroutine(ShiftPitchBurst());
         }
       }
     }
   }
 
+  // 변속 연출을 위한 순간 감속
   void DropForwardSpeedByAmount(float amount)
   {
     amount = Mathf.Max(0, amount);
@@ -698,6 +710,7 @@ public class CarController : MonoBehaviour
     }
   }
 
+  // 부스트 종료 후 부스트 잔여 속도(extraFwd)를 점진적으로 정리
   void ApplyGearHoldAndCap()
   {
     if (gearBypassed && currGear < maxGears)
@@ -752,12 +765,13 @@ public class CarController : MonoBehaviour
   #region Suspension
   void Suspension()
   {
-
+    // 각 휠(레이 포인트)별로 독립적인 서스펜션 계산
     for (int i = 0; i < rayPoints.Length; i++)
     {
       RaycastHit hit;
       float maxDistance = restLen;
 
+      // 휠 기준 아래 방향으로 레이캐스트. wheelRadius를 더해 실제 타이어 접촉 시점을 보정
       if (Physics.Raycast(rayPoints[i].position, -rayPoints[i].up, out hit, maxDistance + wheelRadius, drivable))
       {
         wheelIsGrounded[i] = 1;
@@ -765,12 +779,13 @@ public class CarController : MonoBehaviour
         float currSpringLen = hit.distance - wheelRadius;
         float springCompression = (restLen - currSpringLen) / springTravel;
 
+        // 해당 휠 위치에서의 상대 속도(스프링 방향
         float springVel = Vector3.Dot(rb.GetPointVelocity(rayPoints[i].position), rayPoints[i].up);
-        float dampForce = damperStiffness * springVel;
+        float dampForce = damperStiffness * springVel; // 감쇠력: 스프링 속도에 비례 (진동 억제)
 
-        float springForce = springStiffness * springCompression;
+        float springForce = springStiffness * springCompression; // 반발력: 압축량에 비례
 
-        float netForce = springForce - dampForce;
+        float netForce = springForce - dampForce; // 최종 스프링 힘 (반발 - 감쇠)
 
         rb.AddForceAtPosition(netForce * rayPoints[i].up, rayPoints[i].position);
 
@@ -779,8 +794,9 @@ public class CarController : MonoBehaviour
       }
       else
       {
-        wheelIsGrounded[i] = 0;
+        wheelIsGrounded[i] = 0; // 비접지 상태
 
+        // 공중에 뜬 타이어는 최대 스트로크 위치로 내려서 연출
         SetTirePosition(tires[i], rayPoints[i].position - rayPoints[i].up * (restLen + springTravel) * 0.9f);
         //Debug.DrawLine(rayPoints[i].position, rayPoints[i].position + (wheelRadius + maxDistance) * -rayPoints[i].up, Color.green);
       }
@@ -792,14 +808,15 @@ public class CarController : MonoBehaviour
   {
     if (isInvincible) yield break;
 
-    rb.velocity *= 0.3f;
+    rb.velocity *= 0.3f; // 속도 대폭 감소
 
-    rb.AddForce(Vector3.up * 8f, ForceMode.VelocityChange);
+    rb.AddForce(Vector3.up * 8f, ForceMode.VelocityChange); // 위쪽으로 순간 힘을 주어 피격 반동 연출
 
+    // 공중에서 과도한 회전을 줄이기 위해 드래그 증가
     float originDrag = rb.drag;
     rb.drag = 0.5f;
 
-    yield return new WaitForSeconds(2f); // 2초간 공중 상태
+    yield return new WaitForSeconds(2f);
 
     rb.drag = originDrag;
   }
@@ -817,7 +834,6 @@ public class CarController : MonoBehaviour
     {
       if (other.CompareTag("SpeedUp"))
       {
-        //Debug.Log($"감지 : {other.tag}");
         if (boostApplyer != null)
         {
           boostApplyer.ApplyBoost(2f, 1.1f, 1.5f); // 시간, 크기, 속도
@@ -831,14 +847,12 @@ public class CarController : MonoBehaviour
 
       if (other.CompareTag("Barrel"))
       {
-        //Debug.Log($"감지 : {other.tag}");
         if (!isBarrelRolling)
           StartCoroutine(BarrelRollCoroutine());
       }
 
       if (other.CompareTag("BoostPad"))
       {
-        //Debug.Log($"감지 : {other.tag}");
         if (boostApplyer != null)
         {
           boostApplyer.ApplyBoost(2f, 1.1f, 2f);
@@ -854,7 +868,6 @@ public class CarController : MonoBehaviour
         if (isFinished) return;
 
         BeginFinishSequence(1.5f, false);
-        //StartCoroutine(SmoothStop(2f));
         FinalCount.Instance.Finish();
       }
     }
@@ -870,6 +883,7 @@ public class CarController : MonoBehaviour
     Vector3 initVel = rb.velocity;
     Vector3 initAngularVel = rb.angularVelocity;
 
+    // 지정 시간 동안 선형 보간으로 감속
     while (timer < duration)
     {
       float t = timer / duration;
@@ -908,7 +922,7 @@ public class CarController : MonoBehaviour
     while (timer > 0f)
     {
       Vector3 lv = transform.InverseTransformDirection(rb.velocity);
-      lv.z = Mathf.Max(lv.z, targetSpeed);
+      lv.z = Mathf.Max(lv.z, targetSpeed); // 전진 속도가 targetSpeed보다 낮아지지 않도록 보정
       rb.velocity = transform.TransformDirection(lv);
 
       timer -= Time.fixedDeltaTime;
@@ -921,24 +935,28 @@ public class CarController : MonoBehaviour
   #region Barrel Roll Coroutine
   IEnumerator BarrelRollCoroutine()
   {
-    Vector3 lv = transform.InverseTransformDirection(rb.velocity);
+    Vector3 lv = transform.InverseTransformDirection(rb.velocity); // 현재 전진 속도 보존
     if (boostApplyer != null)
       boostApplyer.ApplyBoost(3, 1.1f, 2f);
-    rb.AddForce(transform.forward * acceleration * 30f, ForceMode.Acceleration);
+    rb.AddForce(transform.forward * acceleration * 30f, ForceMode.Acceleration); // 공중 진입을 위한 추가 전진 가속
+
+    // 최소 전진 속도 보장 (공중 진입 실패 방지)
     lv.z = Mathf.Max(lv.z, 30f);
     rb.velocity = transform.TransformDirection(lv);
 
     ApplyTransientOverdrive(add: maxSpeed * 0.15f, minFwdIfLower: maxSpeed * 0.55f);
+
     yield return new WaitForSeconds(0.4f);
     yield return new WaitUntil(() => !isGrounded);
 
 
     isBarrelRolling = true;
     float timer = barrelRollDuration;
-    float rollDir = Mathf.Sign(steerInput);
+    float rollDir = Mathf.Sign(steerInput); // 조향 입력 방향에 따라 회전 방향 결정
 
     while (timer > 0)
     {
+      // 차량 전방 축 기준 회전 토크 적용
       rb.AddTorque(transform.forward * barrelRollTorque, ForceMode.Acceleration);
       timer -= Time.deltaTime;
       yield return null;
@@ -954,7 +972,9 @@ public class CarController : MonoBehaviour
     if (collision.gameObject.CompareTag("Wall"))
     {
       Rigidbody rb = GetComponent<Rigidbody>();
-      rb.velocity *= 0.5f;
+      rb.velocity *= 0.5f; // 속도 에너지 1차 감소
+      
+      // 충돌 법선 기준 반사 + 추가 감쇠
       rb.velocity = Vector3.Reflect(rb.velocity, collision.contacts[0].normal) * 0.3f;
     }
   }

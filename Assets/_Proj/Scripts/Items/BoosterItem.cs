@@ -20,6 +20,7 @@ public class BoosterItem : MonoBehaviour
     {
       controller.boostApplyer.ApplyBoost(duration, 1.1f, power);
 
+      // 현재 속도가 너무 낮을 경우 즉시 최소 추진력 보장
       Rigidbody rb = controller.GetComponent<Rigidbody>();
       Vector3 lv = controller.transform.InverseTransformDirection(rb.velocity);
       lv.z = Mathf.Max(lv.z, 25f);

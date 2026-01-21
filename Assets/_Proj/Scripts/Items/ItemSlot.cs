@@ -7,7 +7,7 @@ public class ItemSlot : MonoBehaviour
   public SlotUI[] slotUis; // slot오브젝트에 SlotUI컴포넌트 붙이고 할당
   public UseItem useItem; // 플레이어에 UseItem컴포넌트 붙이고 할당
 
-  private ItemData[] itemSlots = new ItemData[2];
+  private ItemData[] itemSlots = new ItemData[2]; // 실제 아이템 데이터 저장용 슬롯 2칸
 
   void Update()
   {
@@ -32,22 +32,24 @@ public class ItemSlot : MonoBehaviour
       UpdateUI() ;
       return true;
     }
-    //Debug.Log("Slots are full");
     return false;
   }
 
+  // 가장 먼저 획득한 아이템 사용 (FIFO)
   public void UseFirstItem()
   {
     if (itemSlots[0] == null) return;
     useItem.currItem = itemSlots[0];
     useItem.Use();
 
+    // 슬롯 당김 (FIFO)
     itemSlots[0] = itemSlots[1];
     itemSlots[1] = null;
 
     UpdateUI();
   }
 
+  // 슬롯 UI 동기화
   private void UpdateUI()
   {
     for(int i = 0; i < slotUis.Length; i++)

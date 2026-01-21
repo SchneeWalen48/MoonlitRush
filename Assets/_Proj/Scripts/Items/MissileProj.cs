@@ -5,8 +5,8 @@ public enum Team { Player, AI }
 public class MissileProj : MonoBehaviour
 {
   private Rigidbody rb;
-  private GameObject me;
-  private Transform target;
+  private GameObject me; // 발사자
+  private Transform target; // 현재 추적 중인 타겟
 
   public float speed;
   public float lifeTime;
@@ -48,10 +48,12 @@ public class MissileProj : MonoBehaviour
 
     var myCols = GetComponentsInChildren<Collider>();
     var shootCols = shooter.GetComponentsInChildren<Collider>();
+    // 발사자와 미사일 간 충돌 무시
     foreach (var mc in myCols)
       foreach (var sc in shootCols)
         Physics.IgnoreCollision(mc, sc);
 
+    // 발사 기준 방향 설정
     Transform basis = fwdBasis != null ? fwdBasis : shooter.transform;
     launchFwd = basis.TransformDirection(Vector3.forward).normalized;
 
@@ -71,9 +73,11 @@ public class MissileProj : MonoBehaviour
   {
     if (rb == null) return;
 
-        //Debug.Log($"미사일 속도: {rb.velocity.magnitude}");
-
-        Vector3 fwd = (rb.velocity.sqrMagnitude > 0.01f) ? rb.velocity.normalized 
+    // 현재 이동 방향 기준 벡터 계산
+    // 1순위: 실제 속도 방향 (이동 중일 때)
+    // 2순위: 발사 시 기준 전방(launchFwd)
+    // 3순위: Transform.forward (모든 정보가 없을 때의 안전망)
+    Vector3 fwd = (rb.velocity.sqrMagnitude > 0.01f) ? rb.velocity.normalized 
       : (launchFwd != Vector3.zero ? launchFwd : transform.forward);
 
     // 가장 가까운 대상 탐색
@@ -81,8 +85,9 @@ public class MissileProj : MonoBehaviour
     // 주체 AI => AI + Player 탐색
     if (target == null)
     {
-      List<GameObject> racers = new List<GameObject>();
+      List<GameObject> racers = new List<GameObject>(); // 탐색 대상 후보 리스트
 
+      // 발사 주체 판별
       bool shooterIsPlayer = (me != null && me.CompareTag("Player"));
       bool shooterIsAI = (me != null && me.CompareTag("AIPlayer"));
 
@@ -98,6 +103,7 @@ public class MissileProj : MonoBehaviour
           racers.Add(ai);
         }
 
+        // AI가 발사한 경우 Player도 추적 대상에 포함
         var playerGO = GameObject.FindGameObjectWithTag("Player");
         if (playerGO != null) racers.Add(playerGO);
       }
@@ -105,14 +111,20 @@ public class MissileProj : MonoBehaviour
       {
         racers.AddRange(GameObject.FindGameObjectsWithTag("AIPlayer"));
       }
-      float minDist = float.MaxValue;
+      float minDist = float.MaxValue; // 가장 가까운 타겟을 고르기 위한 초기 거리값
 
-      float cosFov = Mathf.Cos(75f * Mathf.Deg2Rad);
+      float cosFov = Mathf.Cos(75f * Mathf.Deg2Rad); // 전방 시야각 제한(FOV) 계산용 cos 값 (75도)
 
+      // 타겟 선택 알고리즘
+      // 조건:
+      // 1. 탐지 반경(detectRadius) 이내
+      // 2. 전방 75도 이내 (Dot Product)
+      // 3. 가장 가까운 대상 우선
       foreach (var racer in racers)
       {
         if(racer == null) continue;
 
+        // 발사자 자신 또는 하위 오브젝트 제외
         if (me != null && (racer == me || racer.transform.IsChildOf(me.transform))) continue;
         float dist = Vector3.Distance(transform.position, racer.transform.position);
         if (dist > detectRadius) continue;
@@ -152,9 +164,8 @@ public class MissileProj : MonoBehaviour
 
   void OnCollisionEnter(Collision collision)
   {
+    // 발사자 본인 충돌 무시
     if (me != null && (collision.transform == me.transform || collision.transform.IsChildOf(me.transform))) return;
-
-    print("충돌 " + collision.gameObject.name);
 
     // 미사일 맞았을 때
     var car = collision.gameObject.GetComponentInParent<CarController>();

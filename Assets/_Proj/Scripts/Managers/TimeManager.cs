@@ -7,8 +7,6 @@ public class TimeManager : MonoBehaviour
   // Singleton Instance : Accessible from anywhere
   public static TimeManager Instance;
 
-  //[Header("Podium")]
-  //public GameObject winnerPodiumPrefab;
   private float playerFinishTime = 0f;
   public class PlayerTimeData
   {
@@ -113,9 +111,9 @@ public class TimeManager : MonoBehaviour
     isPaused = false;
     pausedTime = 0f;
     totalPausedDuration = 0f;
-    //winnerPodiumPrefab = null;
   }
 
+  // 이름 기반 기록 저장
   public void RecordFinishTime(string name, float fTime)
   {
 
@@ -129,6 +127,7 @@ public class TimeManager : MonoBehaviour
     data.Add(new PlayerTimeData { playerName = safe, finishTime = fTime, finished = true });
   }
 
+  // RacerInfo 기반 기록 저장
   public void RecordFinishTime(RacerInfo ri, float fTime)
   {
     if (ri == null) return;
