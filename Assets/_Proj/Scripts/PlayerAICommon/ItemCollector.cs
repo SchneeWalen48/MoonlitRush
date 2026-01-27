@@ -12,8 +12,6 @@ public class ItemCollector : MonoBehaviour
 
   void OnTriggerEnter(Collider other)
   {
-    //Debug.Log("Tag: " + other.tag);
-
     if (!other.CompareTag("ItemBooster") && !other.CompareTag("ItemShield") && !other.CompareTag("ItemMissile")) return;
 
     var pick = other.GetComponent<ItemBox>();
