@@ -2,7 +2,7 @@
 
 # 🎮 Moonlit Rush 
 ### 물리 기반 3D 캐주얼 레이싱 게임
-<a href="https://youtu.be/UpttHQ5Wk5s">
+<a href="https://youtu.be/LPo_mc8xSBM">
   <img width="100" height="100" alt="Youtube_logo"
     src="https://github.com/user-attachments/assets/2aa6f449-7ffa-4dd2-9086-232f5499456f" />
 </a>
