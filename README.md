@@ -289,6 +289,7 @@ CarController는 입력을 기반으로 주행 상태를 판단하고,
 - [`TimeManager.cs`](https://github.com/SchneeWalen48/MoonlitRush/blob/main/Assets/_Proj/Scripts/Managers/TimeManager.cs)
 - [`RaceManager.cs`](https://github.com/SchneeWalen48/MoonlitRush/blob/main/Assets/_Proj/Scripts/Managers/RaceManager.cs)
 - [`RankingUI.cs`](https://github.com/SchneeWalen48/MoonlitRush/blob/main/Assets/_Proj/Scripts/UI/RankingUI.cs)
+
 💡 **체크포인트 기반 실시간 순위 산정 시스템**
 
 ### 🥇 System Overview
