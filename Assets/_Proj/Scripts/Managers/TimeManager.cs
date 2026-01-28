@@ -185,16 +185,10 @@ public class TimeManager : MonoBehaviour
         ? FormatTime(p.finishTime)
         : "Time Over";
   }
-  //public void TrySetWinnerPrefab(RacerInfo ri)
-  //{
-  //    if (!winnerPodiumPrefab && ri && ri.podiumDisplayPrefab)
-  //        winnerPodiumPrefab = ri.podiumDisplayPrefab;
-  //}
 
   public List<PlayerTimeData> GetRanking()
   {
     return new List<PlayerTimeData>(data);
-    //return data.OrderBy(p => p.finishTime).ToList(); // Sort racing records by fastest time
   }
 
 }

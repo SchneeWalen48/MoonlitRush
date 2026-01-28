@@ -2,6 +2,9 @@
 using TMPro;
 using System.Collections.Generic;
 
+/// <summary>
+/// 스테이지 씬 실시간 랭킹 스크립트
+/// </summary>
 public class RaceRankUI : MonoBehaviour
 {
     [Header("UI References")]

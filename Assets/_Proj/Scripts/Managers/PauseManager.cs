@@ -20,7 +20,6 @@ public class PauseManager : MonoBehaviour
     isPaused = true;
     Time.timeScale = 0f; // Pause the game
     TimeManager.Instance?.PauseTimer(); // Pause timer
-    // TODO: Pause UI 띄우기
   }
 
   public void ResumeGame()
@@ -28,6 +27,5 @@ public class PauseManager : MonoBehaviour
     isPaused = false;
     Time.timeScale = 1f;
     TimeManager.Instance?.ResumeTimer(); // Resume Timer(Not Restart)
-    // TODO: Pause UI 숨기기
   }
 }

@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using PlayerTimeData = TimeManager.PlayerTimeData;
 
+/// <summary>
+/// 엔딩 씬 순위 스크립트
+/// </summary>
+
 public class RankingUI : MonoBehaviour
 {
     [Header("References")]

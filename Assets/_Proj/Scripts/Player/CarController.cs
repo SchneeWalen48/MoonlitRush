@@ -66,7 +66,6 @@ public class CarController : MonoBehaviour
   [Header("Gear")]
   [SerializeField, Range(1, 5)] private int maxGears = 5;
   [SerializeField] private float[] gearsPercents = new float[] { 0.18f, 0.36f, 0.56f, 0.78f, 1 };
-  //[SerializeField] private float[] gearAccelMultipliers = new float[] { 1.8f, 1.5f, 1.25f, 1f, 0.8f };
   private float holdTopSpeed = 1f; // 자동 변속 전 기어 별 최고 속도에서 유지하는 시간(s)
   [SerializeField, Min(0)] private float dropBeforeShiftAmount = 1f; // 변속 전 기어 별 최고 속도에서 잠깐 속도 줄이는 속도(m/s)[실제 기어 변속 하듯이 <- 수동 변속기 클러치 떼는 순간 속도 살짝 줄어드는 느낌]
 
@@ -150,7 +149,7 @@ public class CarController : MonoBehaviour
   {
     rb = GetComponent<Rigidbody>();
     ApplyStats(stats);
-    // ⭐ 엔진 오디오 시작값 강제: 인트로 전에는 항상 꺼둠
+    // 엔진 오디오 시작값 강제: 인트로 전에는 항상 꺼둠
     if (engineSound == null) engineSound = GetComponent<AudioSource>();
     if (engineSound != null)
     {
@@ -871,32 +870,6 @@ public class CarController : MonoBehaviour
         FinalCount.Instance.Finish();
       }
     }
-  }
-  public IEnumerator SmoothStop(float duration = 1.5f)
-  {
-    isFinished = true;
-
-    // 엑셀은 즉시 막고, 핸들은 계속 살아 있게 둠
-    moveInput = 0;
-
-    float timer = 0f;
-    Vector3 initVel = rb.velocity;
-    Vector3 initAngularVel = rb.angularVelocity;
-
-    // 지정 시간 동안 선형 보간으로 감속
-    while (timer < duration)
-    {
-      float t = timer / duration;
-
-      rb.velocity = Vector3.Lerp(initVel, Vector3.zero, t);
-      rb.angularVelocity = Vector3.Lerp(initAngularVel, Vector3.zero, t);
-
-      timer += Time.deltaTime;
-      yield return null;
-    }
-
-    rb.velocity = Vector3.zero;
-    rb.angularVelocity = Vector3.zero;
   }
   #endregion
 
