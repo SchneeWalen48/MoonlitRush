@@ -49,6 +49,7 @@
 ## 📋 Table of Contents
 
 - [개요(Overview)](#overview)
+- [설계 노트(Design Notes)](#point)
 - [아키텍처(Architecture)](#architecture)
 - [차량 시스템(Vehicle Systems)](#vehicle-system)
   - [서스펜션](#suspension)
@@ -79,6 +80,25 @@
 
 > 본 README에는 팀 프로젝트 중 제가 맡은 **플레이어 차량, 아이템, 랭킹 시스템** 파트가 정리되어 있습니다.
 
+<br><br>
+
+---
+
+<a id="point"></a>
+## ⚙️ Design Notes
+
+> 본 프로젝트는 아케이드 레이싱 특성상 '플레이어의 입력이 예측 가능한 물리 반응으로 이어지는 구조'를 중심으로 설계되었습니다.<br>
+
+- **엔진 기본 WheelCollider 대신 Raycast 기반 서스펜션 구현** <br>
+→ 접지 판정과 반발력을 직접 제어
+- **가속/조향/드리프트를 물리 파라미터로 제어**
+- **Scriptable Object로 데이터화**
+<br>→ 차량 종류 추가 시 차량의 성능을 독립적으로 조정 가능하도록 구성
+<br>→ 아이템 종류 추가 시 아이템 타입과 수치를 독립적으로 조정 가능하도록 구성
+- **입력과 물리 계산(Update/FixedUpdate) 분리**
+- **마찰원 기반 드리프트 슬립 계수 제어**
+<br>→ 고속 코너링 상황에 조향 감각 유지
+  
 <br><br>
 
 ---
